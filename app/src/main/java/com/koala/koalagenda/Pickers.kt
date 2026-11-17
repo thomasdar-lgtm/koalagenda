@@ -64,17 +64,27 @@ fun DateChamp(label: String, date: LocalDate, modifier: Modifier = Modifier.fill
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HeureChamp(label: String, heure: LocalTime, modifier: Modifier = Modifier.fillMaxWidth(), onChange: (LocalTime) -> Unit) {
+fun HeureChamp(
+    label: String,
+    heure: LocalTime?,
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    onJournee: (() -> Unit)? = null,
+    onChange: (LocalTime) -> Unit,
+) {
     var open by remember { mutableStateOf(false) }
-    Champ(label, "%02dh%02d".format(heure.hour, heure.minute), modifier) { open = true }
+    Champ(label, heure?.let { "%02dh%02d".format(it.hour, it.minute) } ?: "Journée", modifier) { open = true }
     if (open) {
-        val st = rememberTimePickerState(heure.hour, heure.minute, is24Hour = true)
+        val h = heure ?: LocalTime.of(14, 0)
+        val st = rememberTimePickerState(h.hour, h.minute, is24Hour = true)
         AlertDialog(
             onDismissRequest = { open = false },
             confirmButton = {
                 TextButton(onClick = { onChange(LocalTime.of(st.hour, st.minute)); open = false }) { Text("OK") }
             },
-            dismissButton = { TextButton(onClick = { open = false }) { Text("Annuler") } },
+            dismissButton = {
+                if (onJournee != null) TextButton(onClick = { onJournee(); open = false }) { Text("Toute la journée") }
+                else TextButton(onClick = { open = false }) { Text("Annuler") }
+            },
             text = { TimePicker(st) },
         )
     }

@@ -27,6 +27,7 @@ data class AgendaState(
     val jours: Map<String, Jour> = emptyMap(),
     val evenements: List<Evenement> = emptyList(),
     val couleurs: Map<Who, Long> = COULEURS_DEFAUT,
+    val enfants: Enfants = Enfants(),
     val pending: Boolean = false,
     val error: String? = null,
 ) {
@@ -94,7 +95,7 @@ class Repo private constructor(private val ctx: Context) {
         charge += nom
         val s = f(_state.value)
         _state.value = s.copy(
-            loaded = charge.size >= 4,
+            loaded = charge.size >= 5,
             pending = pend.values.any { it },
             error = err,
         )
@@ -129,6 +130,7 @@ class Repo private constructor(private val ctx: Context) {
             moi?.let { Rappels.planifier(ctx, l, it) }
         }
         listenCouleurs()
+        listenEnfants()
     }
 
     private fun listenCouleurs() {
@@ -139,6 +141,18 @@ class Repo private constructor(private val ctx: Context) {
             }
             maj("c", snap?.metadata?.hasPendingWrites() == true, null) { it.copy(couleurs = m) }
         }
+    }
+
+    private fun listenEnfants() {
+        regs += db.collection("reglages").document("enfants").addSnapshotListener(MetadataChanges.INCLUDE) { snap, err ->
+            if (err != null) { maj("k", false, err.message) { it }; return@addSnapshotListener }
+            val e = Enfants.fromMap(if (snap?.exists() == true) snap.data else null)
+            maj("k", snap?.metadata?.hasPendingWrites() == true, null) { it.copy(enfants = e) }
+        }
+    }
+
+    fun saveEnfants(e: Enfants) {
+        db.collection("reglages").document("enfants").set(e.toMap())
     }
 
     fun saveCouleur(w: Who, c: Long) {

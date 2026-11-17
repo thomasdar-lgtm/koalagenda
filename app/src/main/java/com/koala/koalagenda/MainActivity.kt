@@ -121,6 +121,8 @@ fun App(repo: Repo) {
                 onChangeMoi = { repo.moi = null; moi = null; screen = Screen.Month },
                 onSignOut = { repo.signOut(); signedIn = false; screen = Screen.Month },
                 onCouleur = { w, c -> repo.saveCouleur(w, c) },
+                enfants = state.enfants,
+                onEnfants = { repo.saveEnfants(it) },
                 onBack = { screen = Screen.Month },
             )
 

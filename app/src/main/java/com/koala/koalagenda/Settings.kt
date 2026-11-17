@@ -250,6 +250,8 @@ fun ReglagesScreen(
     onChangeMoi: () -> Unit,
     onSignOut: () -> Unit,
     onCouleur: (Who, Long) -> Unit,
+    enfants: Enfants,
+    onEnfants: (Enfants) -> Unit,
     onBack: () -> Unit,
 ) {
     val ctx = androidx.compose.ui.platform.LocalContext.current
@@ -280,6 +282,21 @@ fun ReglagesScreen(
             Section("Planning")
             LienReglage("Roulements", onRoulements)
             LienReglage("Compteurs", onCompteurs)
+            Section("Enfants")
+            Carte {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Une semaine sur deux", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.weight(1f))
+                    androidx.compose.material3.Switch(checked = enfants.actif, onCheckedChange = { onEnfants(enfants.copy(actif = it)) })
+                }
+                if (enfants.actif) {
+                    Spacer(Modifier.height(10.dp))
+                    val ici = enfants.presents(LocalDate.now())
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Choix("Cette semaine : avec", ici, Color(0xFF2ED3C6)) { onEnfants(enfants.avec(LocalDate.now(), true)) }
+                        Choix("sans", !ici, Muted) { onEnfants(enfants.avec(LocalDate.now(), false)) }
+                    }
+                }
+            }
             Section("Couleurs")
             Who.entries.forEach { w -> ChoixCouleur(w, onCouleur) }
             Section("Ce téléphone")

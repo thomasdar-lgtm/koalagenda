@@ -56,55 +56,44 @@ fun EventScreen(
                 e.titre, { e = e.copy(titre = it) }, label = { Text("Titre") },
                 singleLine = true, modifier = Modifier.fillMaxWidth(),
             )
-            Spacer(Modifier.height(12.dp))
-            DateChamp("Date", e.date) { e = e.copy(date = it) }
-            Spacer(Modifier.height(12.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Toute la journée", color = Color.White, fontSize = 15.sp, modifier = Modifier.weight(1f))
-                Switch(checked = e.journee, onCheckedChange = { j -> e = e.copy(heure = if (j) "" else "14:00") })
-            }
-            if (!e.journee) {
-                Spacer(Modifier.height(8.dp))
-                HeureChamp("Heure", e.heureLocale() ?: LocalTime.of(14, 0)) {
+            Spacer(Modifier.height(10.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                DateChamp("Date", e.date, Modifier.weight(1.6f)) { e = e.copy(date = it) }
+                HeureChamp("Heure", e.heureLocale(), Modifier.weight(1f), onJournee = { e = e.copy(heure = "") }) {
                     e = e.copy(heure = "%02d:%02d".format(it.hour, it.minute))
                 }
             }
-
-            Section("Pour qui")
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Petit("Pour")
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf("thomas", "cindy", "deux").forEach { p ->
                     Choix(pourLabel(p), e.pour == p, pourColor(p)) { e = e.copy(pour = p) }
                 }
             }
-
-            Section("Visible par")
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Petit("Visible")
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Choix("Nous deux", !e.prive) { e = e.copy(prive = false) }
-                Choix("Privé", e.prive) { e = e.copy(prive = true) }
+                Choix("Privé 🔒", e.prive) { e = e.copy(prive = true) }
             }
-
-            Section("Rappel")
+            Petit("Rappel")
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 RAPPELS.forEach { (m, l) -> Choix(l, e.rappel == m) { e = e.copy(rappel = m) } }
             }
-
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
             OutlinedTextField(
                 e.note, { e = e.copy(note = it) }, label = { Text("Note") },
-                modifier = Modifier.fillMaxWidth(), minLines = 2,
+                singleLine = true, modifier = Modifier.fillMaxWidth(),
             )
-            Spacer(Modifier.height(20.dp))
-            Button(
-                onClick = { onSave(e) }, enabled = e.titre.isNotBlank(),
-                modifier = Modifier.fillMaxWidth().height(50.dp),
-            ) { Text("Enregistrer", fontWeight = FontWeight.Bold, fontSize = 16.sp) }
-            if (!isNew) {
-                Spacer(Modifier.height(10.dp))
-                OutlinedButton(onClick = { confirm = true }, modifier = Modifier.fillMaxWidth()) {
+            Spacer(Modifier.height(16.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                if (!isNew) OutlinedButton(onClick = { confirm = true }, modifier = Modifier.height(50.dp)) {
                     Text("Supprimer", color = Red)
                 }
+                Button(
+                    onClick = { onSave(e) }, enabled = e.titre.isNotBlank(),
+                    modifier = Modifier.weight(1f).height(50.dp),
+                ) { Text("Enregistrer", fontWeight = FontWeight.Bold, fontSize = 16.sp) }
             }
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(16.dp))
         }
     }
     if (confirm) AlertDialog(
@@ -115,3 +104,9 @@ fun EventScreen(
         dismissButton = { TextButton(onClick = { confirm = false }) { Text("Annuler") } },
     )
 }
+
+@Composable
+private fun Petit(t: String) = Text(
+    t, color = Muted, fontSize = 12.sp, fontWeight = FontWeight.Bold,
+    modifier = Modifier.padding(top = 12.dp, bottom = 6.dp),
+)

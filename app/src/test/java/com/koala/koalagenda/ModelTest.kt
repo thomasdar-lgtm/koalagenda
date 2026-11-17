@@ -75,6 +75,18 @@ class ModelTest {
         assertEquals(5, efface.size)
     }
 
+    @Test fun enfantsUneSemaineSurDeux() {
+        val e = Enfants()
+        assertTrue(e.presents(d("2026-11-16")) && e.presents(d("2026-11-22")))
+        assertTrue(!e.presents(d("2026-11-23")) && !e.presents(d("2026-11-29")))
+        assertTrue(e.presents(d("2026-11-30")) && e.presents(d("2026-11-09").minusWeeks(1)))
+        assertTrue(!e.presents(d("2026-11-09")))
+        val inv = e.avec(d("2026-11-18"), false)
+        assertTrue(!inv.presents(d("2026-11-18")) && inv.presents(d("2026-11-25")))
+        assertTrue(!Enfants(actif = false).presents(d("2026-11-16")))
+        assertEquals(e, Enfants.fromMap(e.toMap()))
+    }
+
     @Test fun rappel() {
         val e = Evenement(date = d("2026-12-02"), heure = "14:30", rappel = 60)
         val attendu = d("2026-12-02").atTime(13, 30).toInstant(ZoneOffset.UTC).toEpochMilli()

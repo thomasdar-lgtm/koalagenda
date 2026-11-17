@@ -122,6 +122,25 @@ data class Roulement(
     }
 }
 
+/** Garde des enfants une semaine sur deux. [debut] = lundi d'une semaine où ils sont là. */
+data class Enfants(val actif: Boolean = true, val debut: LocalDate = LocalDate.of(2026, 11, 16)) {
+    fun presents(d: LocalDate): Boolean =
+        actif && Math.floorMod(Math.floorDiv(ChronoUnit.DAYS.between(debut, lundi(d)), 7L), 2L) == 0L
+
+    /** Change la semaine de [d] : présents ou non. */
+    fun avec(d: LocalDate, presents: Boolean): Enfants =
+        copy(debut = if (presents) lundi(d) else lundi(d).plusWeeks(1))
+
+    fun toMap(): Map<String, Any> = mapOf("actif" to actif, "debut" to debut.toString())
+
+    companion object {
+        fun fromMap(m: Map<String, Any?>?): Enfants = if (m == null) Enfants() else Enfants(
+            actif = m["actif"] != false,
+            debut = anyToDate(m["debut"]) ?: LocalDate.of(2026, 11, 16),
+        )
+    }
+}
+
 /** Modification d'un jour précis. [etat] null = on suit le roulement. */
 data class Jour(
     val who: Who,
