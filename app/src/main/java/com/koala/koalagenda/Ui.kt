@@ -89,16 +89,19 @@ fun etatColor(e: Etat): Color = when (e) {
     Etat.FRAC -> Purple
 }
 
-fun whoColor(w: Who): Color = when (w) {
-    Who.THOMAS -> Blue
-    Who.CINDY -> Pink
-}
+/** Couleurs choisies par chacun (synchronisées), fournies par App. */
+val LocalCouleurs = androidx.compose.runtime.compositionLocalOf<Map<Who, Long>> { COULEURS_DEFAUT }
 
-fun pourColor(pour: String): Color = when (pour) {
-    "thomas" -> Blue
-    "cindy" -> Pink
-    else -> Yellow
-}
+val PALETTE: List<Long> = listOf(
+    0xFF5AA9FF, 0xFF7C8CFF, 0xFFB57BFF, 0xFFFF7EB6, 0xFFFF6B6B,
+    0xFFFF9F43, 0xFFC6E06B, 0xFF4CC38A, 0xFF2ED3C6, 0xFFE0E6F5,
+)
+
+@Composable
+fun whoColor(w: Who): Color = Color(LocalCouleurs.current[w] ?: COULEURS_DEFAUT.getValue(w))
+
+@Composable
+fun pourColor(pour: String): Color = Who.of(pour)?.let { whoColor(it) } ?: Yellow
 
 fun pourLabel(pour: String): String = when (pour) {
     "thomas" -> "Thomas"
@@ -181,8 +184,6 @@ fun LoginScreen(repo: Repo, onDone: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Logo(34)
-        Spacer(Modifier.height(8.dp))
-        Text("Votre agenda, partagé entre vos deux téléphones", color = Muted, fontSize = 14.sp)
         Spacer(Modifier.height(32.dp))
         OutlinedTextField(
             email, { email = it }, label = { Text("E-mail commun") }, singleLine = true,
@@ -229,8 +230,6 @@ fun WhoScreen(onPick: (Who) -> Unit) = Column(
     Logo(30)
     Spacer(Modifier.height(36.dp))
     Text("Qui utilise ce téléphone ?", color = Color.White, fontWeight = FontWeight.Black, fontSize = 22.sp)
-    Spacer(Modifier.height(8.dp))
-    Text("Pour les rdv privés et les rappels", color = Muted, fontSize = 14.sp)
     Spacer(Modifier.height(28.dp))
     Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
         Who.entries.forEach { w ->

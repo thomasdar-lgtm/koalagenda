@@ -99,6 +99,7 @@ fun App(repo: Repo) {
 
     fun nouveau(date: LocalDate) = Evenement(date = date, auteur = m.id, pour = "deux", rappel = 60, heure = "")
 
+    androidx.compose.runtime.CompositionLocalProvider(LocalCouleurs provides state.couleurs) {
     Box(Modifier.fillMaxSize()) {
         when (val s = screen) {
             Screen.Month -> MonthScreen(
@@ -119,6 +120,7 @@ fun App(repo: Repo) {
                 onCompteurs = { screen = Screen.Compteurs },
                 onChangeMoi = { repo.moi = null; moi = null; screen = Screen.Month },
                 onSignOut = { repo.signOut(); signedIn = false; screen = Screen.Month },
+                onCouleur = { w, c -> repo.saveCouleur(w, c) },
                 onBack = { screen = Screen.Month },
             )
 
@@ -162,4 +164,5 @@ fun App(repo: Repo) {
             Screen.Compteurs -> CompteursScreen(state, onBack = { screen = Screen.Reglages })
         }
     }
+}
 }

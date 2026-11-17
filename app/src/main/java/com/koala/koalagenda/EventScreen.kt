@@ -53,7 +53,7 @@ fun EventScreen(
         TopBar(if (isNew) "Nouveau rdv" else "Rdv", onBack)
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
             OutlinedTextField(
-                e.titre, { e = e.copy(titre = it) }, label = { Text("Quoi ? (dentiste, anniversaire…)") },
+                e.titre, { e = e.copy(titre = it) }, label = { Text("Titre") },
                 singleLine = true, modifier = Modifier.fillMaxWidth(),
             )
             Spacer(Modifier.height(12.dp))
@@ -80,25 +80,17 @@ fun EventScreen(
             Section("Visible par")
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Choix("Nous deux", !e.prive) { e = e.copy(prive = false) }
-                Choix("Moi seulement (privé)", e.prive) { e = e.copy(prive = true) }
+                Choix("Privé", e.prive) { e = e.copy(prive = true) }
             }
-            if (e.prive) Text(
-                "Masqué sur le téléphone de ${if (moi == Who.THOMAS) "Cindy" else "Thomas"}",
-                color = Muted, fontSize = 12.sp, modifier = Modifier.padding(top = 6.dp),
-            )
 
             Section("Rappel")
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 RAPPELS.forEach { (m, l) -> Choix(l, e.rappel == m) { e = e.copy(rappel = m) } }
             }
-            if (e.journee && e.rappel >= 0) Text(
-                "Journée entière : rappel calculé sur 9h", color = Muted, fontSize = 12.sp,
-                modifier = Modifier.padding(top = 6.dp),
-            )
 
             Spacer(Modifier.height(16.dp))
             OutlinedTextField(
-                e.note, { e = e.copy(note = it) }, label = { Text("Note (lieu, détails…)") },
+                e.note, { e = e.copy(note = it) }, label = { Text("Note") },
                 modifier = Modifier.fillMaxWidth(), minLines = 2,
             )
             Spacer(Modifier.height(20.dp))

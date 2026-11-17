@@ -32,6 +32,8 @@ enum class Etat(val id: String, val label: String) {
     }
 }
 
+val COULEURS_DEFAUT: Map<Who, Long> = mapOf(Who.THOMAS to 0xFF5AA9FF, Who.CINDY to 0xFFFF7EB6)
+
 val JOURS_COURTS = listOf("L", "M", "M", "J", "V", "S", "D")
 val JOURS_LONGS = listOf("lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche")
 val MOIS = listOf(

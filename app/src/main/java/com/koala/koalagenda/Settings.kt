@@ -2,6 +2,7 @@ package com.koala.koalagenda
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -77,29 +78,20 @@ fun PeriodeScreen(
             Section("Quoi")
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf(Etat.CONGE, Etat.RECUP, Etat.FRAC, Etat.REPOS, Etat.TRAVAIL).forEach { e ->
-                    Choix(e.label, etat == e, if (e == Etat.TRAVAIL) Color.White else etatColor(e)) { etat = e }
+                    Choix(e.label, etat == e, whoColor(who)) { etat = e }
                 }
-                Choix("Revenir au roulement", etat == null, Muted) { etat = null }
+                Choix("Auto", etat == null, Muted) { etat = null }
             }
             Section("Période")
             DateChamp("Du", du) { du = it; if (au.isBefore(it)) au = it }
             Spacer(Modifier.height(8.dp))
             DateChamp("Au (inclus)", au) { au = it; if (it.isBefore(du)) du = it }
             Spacer(Modifier.height(14.dp))
-            Text(
-                when {
-                    changes.isEmpty() -> "Aucun jour à modifier"
-                    etat in listOf(Etat.CONGE, Etat.RECUP, Etat.FRAC) ->
-                        "${changes.size} jour(s) travaillé(s) concerné(s) — les repos ne sont pas décomptés"
-                    else -> "${changes.size} jour(s) modifié(s)"
-                },
-                color = Muted, fontSize = 13.sp,
-            )
             Spacer(Modifier.height(20.dp))
             Button(
                 onClick = { onApply(changes) }, enabled = changes.isNotEmpty(),
                 modifier = Modifier.fillMaxWidth().height(50.dp),
-            ) { Text("Appliquer", fontWeight = FontWeight.Bold, fontSize = 16.sp) }
+            ) { Text("Appliquer · ${changes.size} j", fontWeight = FontWeight.Bold, fontSize = 16.sp) }
             Spacer(Modifier.height(24.dp))
         }
     }
@@ -121,12 +113,12 @@ fun RoulementScreen(state: AgendaState, moi: Who, onSave: (Who, Roulement) -> Un
 }
 
 @Composable
-private fun JoursChips(sel: Set<Int>, onToggle: (Int) -> Unit) = Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+private fun JoursChips(sel: Set<Int>, couleur: Color, onToggle: (Int) -> Unit) = Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
     JOURS_COURTS.forEachIndexed { i, l ->
         val j = i + 1
         val on = j in sel
         Box(
-            Modifier.size(38.dp).clip(CircleShape).background(if (on) Green else Navy3).clickable { onToggle(j) },
+            Modifier.size(38.dp).clip(CircleShape).background(if (on) couleur else Navy3).clickable { onToggle(j) },
             contentAlignment = Alignment.Center,
         ) { Text(l, color = if (on) Navy else Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp) }
     }
@@ -144,20 +136,18 @@ private fun EditeurRoulement(who: Who, r0: Roulement, onSave: (Roulement) -> Uni
         .let { if (cycle.isEmpty()) it else it.avecSemaineActuelle(today, actuelle.coerceIn(0, cycle.size - 1)) }
 
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
-        Section("Repos fixes (toutes les semaines)")
-        JoursChips(fixes) { j -> fixes = if (j in fixes) fixes - j else fixes + j }
+        Section("Repos fixes")
+        JoursChips(fixes, whoColor(who)) { j -> fixes = if (j in fixes) fixes - j else fixes + j }
 
         Section("Repos tournant")
-        Text("Touche « Cette semaine » sur la semaine du cycle en cours.", color = Muted, fontSize = 12.sp)
-        Spacer(Modifier.height(8.dp))
         cycle.forEachIndexed { i, s ->
             Carte(Modifier.padding(bottom = 8.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("Semaine ${i + 1}", color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                    Choix("Cette semaine", actuelle == i) { actuelle = i }
+                    Choix("En cours", actuelle == i) { actuelle = i }
                 }
                 Spacer(Modifier.height(8.dp))
-                JoursChips(s) { j ->
+                JoursChips(s, whoColor(who)) { j ->
                     cycle = cycle.toMutableList().also { it[i] = if (j in s) s - j else s + j }
                 }
             }
@@ -173,12 +163,12 @@ private fun EditeurRoulement(who: Who, r0: Roulement, onSave: (Roulement) -> Uni
         Section("Congés")
         OutlinedTextField(
             conges, { conges = it.filter { c -> c.isDigit() }.take(3) },
-            label = { Text("Jours de congés par an") }, singleLine = true,
+            label = { Text("Congés par an") }, singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth(),
         )
 
-        Section("Aperçu des 4 prochaines semaines")
+        Section("Aperçu")
         val apercu = construit()
         val l0 = lundi(today)
         repeat(4) { k ->
@@ -192,7 +182,7 @@ private fun EditeurRoulement(who: Who, r0: Roulement, onSave: (Roulement) -> Uni
 
         Spacer(Modifier.height(20.dp))
         Button(onClick = { onSave(construit()) }, modifier = Modifier.fillMaxWidth().height(50.dp)) {
-            Text("Enregistrer le roulement de ${who.label}", fontWeight = FontWeight.Bold)
+            Text("Enregistrer", fontWeight = FontWeight.Bold)
         }
         Spacer(Modifier.height(24.dp))
     }
@@ -236,10 +226,7 @@ fun CompteursScreen(state: AgendaState, onBack: () -> Unit) {
                     }
                 }
             }
-            Text(
-                "Le quota de congés se règle dans Roulements.", color = Muted, fontSize = 12.sp,
-                modifier = Modifier.padding(bottom = 24.dp),
-            )
+            Spacer(Modifier.height(24.dp))
         }
     }
 }
@@ -262,6 +249,7 @@ fun ReglagesScreen(
     onCompteurs: () -> Unit,
     onChangeMoi: () -> Unit,
     onSignOut: () -> Unit,
+    onCouleur: (Who, Long) -> Unit,
     onBack: () -> Unit,
 ) {
     val ctx = androidx.compose.ui.platform.LocalContext.current
@@ -290,21 +278,44 @@ fun ReglagesScreen(
                 ) { Text(if (cherche) "Recherche…" else "Rechercher une mise à jour", fontWeight = FontWeight.Bold) }
             }
             Section("Planning")
-            LienReglage("Roulements", "Repos fixes, repos tournant, congés par an", onRoulements)
-            LienReglage("Compteurs", "Congés, récups, fracs, heures sup, remplacements", onCompteurs)
+            LienReglage("Roulements", onRoulements)
+            LienReglage("Compteurs", onCompteurs)
+            Section("Couleurs")
+            Who.entries.forEach { w -> ChoixCouleur(w, onCouleur) }
             Section("Ce téléphone")
-            LienReglage("Je suis ${moi.label}", "Changer d'utilisateur", onChangeMoi)
-            LienReglage("Se déconnecter", "Compte commun", onSignOut)
+            LienReglage("Je suis ${moi.label} · changer", onChangeMoi)
+            LienReglage("Se déconnecter", onSignOut)
             Spacer(Modifier.height(24.dp))
         }
     }
 }
 
 @Composable
-private fun LienReglage(titre: String, sous: String, onClick: () -> Unit) = Column(
+private fun LienReglage(titre: String, onClick: () -> Unit) = Column(
     Modifier.fillMaxWidth().padding(bottom = 8.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(14.dp))
         .background(Navy2).clickable { onClick() }.padding(14.dp),
 ) {
     Text(titre, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-    Text(sous, color = Muted, fontSize = 12.sp)
+}
+
+@Composable
+private fun ChoixCouleur(w: Who, onCouleur: (Who, Long) -> Unit) {
+    val actuelle = LocalCouleurs.current[w]
+    Carte(Modifier.padding(bottom = 8.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Avatar(w, 26)
+            Spacer(Modifier.width(10.dp))
+            Text(w.label, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        }
+        Spacer(Modifier.height(10.dp))
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            PALETTE.forEach { c ->
+                Box(
+                    Modifier.size(26.dp).clip(CircleShape).background(Color(c))
+                        .then(if (c == actuelle) Modifier.border(3.dp, Color.White, CircleShape) else Modifier)
+                        .clickable { onCouleur(w, c) },
+                )
+            }
+        }
+    }
 }

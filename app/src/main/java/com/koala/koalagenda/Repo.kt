@@ -26,6 +26,7 @@ data class AgendaState(
     val roulements: Map<Who, Roulement> = Who.entries.associateWith { Roulement.parDefaut(it) },
     val jours: Map<String, Jour> = emptyMap(),
     val evenements: List<Evenement> = emptyList(),
+    val couleurs: Map<Who, Long> = COULEURS_DEFAUT,
     val pending: Boolean = false,
     val error: String? = null,
 ) {
@@ -93,7 +94,7 @@ class Repo private constructor(private val ctx: Context) {
         charge += nom
         val s = f(_state.value)
         _state.value = s.copy(
-            loaded = charge.size >= 3,
+            loaded = charge.size >= 4,
             pending = pend.values.any { it },
             error = err,
         )
@@ -127,6 +128,22 @@ class Repo private constructor(private val ctx: Context) {
             maj("e", snap.metadata.hasPendingWrites(), null) { it.copy(evenements = trierEvenements(l)) }
             moi?.let { Rappels.planifier(ctx, l, it) }
         }
+        listenCouleurs()
+    }
+
+    private fun listenCouleurs() {
+        regs += db.collection("reglages").document("couleurs").addSnapshotListener(MetadataChanges.INCLUDE) { snap, err ->
+            if (err != null) { maj("c", false, err.message) { it }; return@addSnapshotListener }
+            val m = Who.entries.associateWith { w ->
+                (snap?.get(w.id) as? Number)?.toLong() ?: COULEURS_DEFAUT.getValue(w)
+            }
+            maj("c", snap?.metadata?.hasPendingWrites() == true, null) { it.copy(couleurs = m) }
+        }
+    }
+
+    fun saveCouleur(w: Who, c: Long) {
+        db.collection("reglages").document("couleurs")
+            .set(mapOf(w.id to c), com.google.firebase.firestore.SetOptions.merge())
     }
 
     fun replanifierRappels() {

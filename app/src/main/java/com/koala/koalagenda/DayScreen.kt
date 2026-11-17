@@ -73,17 +73,16 @@ fun DayScreen(
                 Spacer(Modifier.height(12.dp))
             }
 
-            Section("Rdv et évènements")
             val evts = state.evenements.filter { it.date == date && it.visiblePar(moi) }
-            if (evts.isEmpty()) Text("Rien de prévu", color = Muted, fontSize = 14.sp)
+            if (evts.isNotEmpty()) Section("Rdv")
             evts.forEach { e -> LigneEvenement(e, showDate = false) { sauver(repo, jt, jc, init); onEvent(e) } }
             Spacer(Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 Button(onClick = { sauver(repo, jt, jc, init); onNewEvent() }, modifier = Modifier.weight(1f)) {
-                    Text("+ Rdv ce jour", fontWeight = FontWeight.Bold)
+                    Text("+ Rdv", fontWeight = FontWeight.Bold)
                 }
                 OutlinedButton(onClick = { sauver(repo, jt, jc, init); onPeriode() }, modifier = Modifier.weight(1f)) {
-                    Text("Congés sur période", color = Yellow)
+                    Text("Période", color = Yellow)
                 }
             }
             Spacer(Modifier.height(18.dp))
@@ -103,53 +102,47 @@ private fun sauver(repo: Repo, jt: Jour, jc: Jour, init: List<Jour>) {
 @Composable
 private fun CarteJour(r: Roulement, j: Jour, onChange: (Jour) -> Unit) {
     val v = jourVu(r, j, j.date)
-    val auto = r.etatAuto(j.date)
-    Carte {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Avatar(j.who, 30)
-            Spacer(Modifier.width(10.dp))
-            Text(j.who.label, color = Color.White, fontWeight = FontWeight.Black, fontSize = 17.sp, modifier = Modifier.weight(1f))
-            Box(
-                Modifier.clip(RoundedCornerShape(50)).background(etatColor(v.etat)).padding(horizontal = 10.dp, vertical = 4.dp),
-            ) {
-                Text(
-                    v.etat.label + if (v.etat == Etat.TRAVAIL) (if (v.heureSup) " 4h–12h21" else " 5h–12h21") else "",
-                    color = if (v.etat == Etat.TRAVAIL) Color.White else Navy, fontWeight = FontWeight.Bold, fontSize = 13.sp,
-                )
-            }
+    val couleur = whoColor(j.who)
+    Column(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Navy2),
+    ) {
+        Row(
+            Modifier.fillMaxWidth()
+                .background(if (v.etat.off) couleur else Navy3)
+                .padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                j.who.label, color = if (v.etat.off) Navy else Color.White,
+                fontWeight = FontWeight.Black, fontSize = 18.sp, modifier = Modifier.weight(1f),
+            )
+            Text(
+                if (v.etat == Etat.TRAVAIL) (if (v.heureSup) "4h – 12h21" else "5h – 12h21") else v.etat.label,
+                color = if (v.etat.off) Navy else couleur, fontWeight = FontWeight.Black, fontSize = 15.sp,
+            )
         }
-        Spacer(Modifier.height(4.dp))
-        Text(
-            if (v.auto) "D'après le roulement" else "Modifié (roulement : ${auto.label.lowercase()})",
-            color = Muted, fontSize = 12.sp,
-        )
-        Spacer(Modifier.height(10.dp))
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Choix("Roulement", j.etat == null, Muted) { onChange(j.copy(etat = null)) }
-            Etat.entries.forEach { e ->
-                Choix(e.label, j.etat == e, if (e == Etat.TRAVAIL) Color.White else etatColor(e)) { onChange(j.copy(etat = e)) }
+        Column(Modifier.padding(14.dp)) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Choix("Auto", j.etat == null, Muted) { onChange(j.copy(etat = null)) }
+                Etat.entries.forEach { e -> Choix(e.label, j.etat == e, couleur) { onChange(j.copy(etat = e)) } }
             }
-        }
-        if (v.etat == Etat.TRAVAIL) {
-            Spacer(Modifier.height(12.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
-                    Text("Heure sup", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                    Text("Début à 4h", color = Muted, fontSize = 12.sp)
+            if (v.etat == Etat.TRAVAIL) {
+                Spacer(Modifier.height(12.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Heure sup", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp, modifier = Modifier.weight(1f))
+                    Switch(checked = j.heureSup, onCheckedChange = { onChange(j.copy(heureSup = it)) })
                 }
-                Switch(checked = j.heureSup, onCheckedChange = { onChange(j.copy(heureSup = it)) })
+                Spacer(Modifier.height(6.dp))
+                OutlinedTextField(
+                    j.remplacement, { onChange(j.copy(remplacement = it)) },
+                    label = { Text("Remplacement") }, singleLine = true, modifier = Modifier.fillMaxWidth(),
+                )
             }
             Spacer(Modifier.height(8.dp))
             OutlinedTextField(
-                j.remplacement, { onChange(j.copy(remplacement = it)) },
-                label = { Text("Remplacement (poste, ex. ordo)") }, singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
+                j.note, { onChange(j.copy(note = it)) },
+                label = { Text("Note") }, singleLine = true, modifier = Modifier.fillMaxWidth(),
             )
         }
-        Spacer(Modifier.height(8.dp))
-        OutlinedTextField(
-            j.note, { onChange(j.copy(note = it)) },
-            label = { Text("Note") }, singleLine = true, modifier = Modifier.fillMaxWidth(),
-        )
     }
 }
