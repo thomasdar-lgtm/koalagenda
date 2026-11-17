@@ -48,6 +48,14 @@ class ModelTest {
         assertEquals(e, Evenement.fromMap("a", e.toMap()))
     }
 
+    @Test fun pasDeTableauDansUnTableau() {
+        // Firestore plante si une liste contient une liste
+        listOf(thomas, cindy, Roulement(cycle = listOf(emptySet(), setOf(1, 4)))).forEach { r ->
+            r.toMap().values.filterIsInstance<List<*>>().forEach { l -> assertTrue(l.none { it is List<*> }) }
+            assertEquals(r, Roulement.fromMap(r.toMap()))
+        }
+    }
+
     @Test fun modificationDuJour() {
         val j = Jour(Who.THOMAS, d("2026-11-21"), Etat.TRAVAIL, heureSup = true, remplacement = "ordo")
         val v = jourVu(thomas, j, j.date)

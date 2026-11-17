@@ -95,7 +95,8 @@ data class Roulement(
 
     fun toMap(): Map<String, Any> = mapOf(
         "fixes" to fixes.sorted(),
-        "cycle" to cycle.map { it.sorted() },
+        // Firestore refuse les tableaux dans des tableaux : chaque semaine devient "6" ou "1,4"
+        "cycle" to cycle.map { it.sorted().joinToString(",") },
         "debut" to debut.toString(),
         "congesParAn" to congesParAn,
     )
@@ -103,7 +104,10 @@ data class Roulement(
     companion object {
         fun fromMap(m: Map<String, Any?>): Roulement = Roulement(
             fixes = anyToIntSet(m["fixes"]),
-            cycle = (m["cycle"] as? List<*>)?.map { anyToIntSet(it) } ?: emptyList(),
+            cycle = (m["cycle"] as? List<*>)?.map { w ->
+                if (w is String) w.split(",").mapNotNull { it.trim().toIntOrNull() }.filter { it in 1..7 }.toSet()
+                else anyToIntSet(w)
+            } ?: emptyList(),
             debut = anyToDate(m["debut"]) ?: LocalDate.of(2026, 11, 16),
             congesParAn = anyToInt(m["congesParAn"]) ?: 25,
         )
