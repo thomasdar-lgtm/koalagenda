@@ -76,7 +76,10 @@ class Repo private constructor(private val ctx: Context) {
 
     var moi: Who?
         get() = Who.of(prefs.getString("moi", null))
-        set(v) { prefs.edit().putString("moi", v?.id).apply() }
+        set(v) {
+            prefs.edit().putString("moi", v?.id).apply()
+            runCatching { WidgetStore.sauver(ctx, _state.value, v) }
+        }
 
     suspend fun signIn(email: String, pass: String) {
         auth.signInWithEmailAndPassword(email.trim(), pass).awaitTask()
@@ -99,6 +102,7 @@ class Repo private constructor(private val ctx: Context) {
             pending = pend.values.any { it },
             error = err,
         )
+        runCatching { WidgetStore.sauver(ctx, _state.value, moi) }
     }
 
     fun listen() {
