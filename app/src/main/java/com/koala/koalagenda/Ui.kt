@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -242,5 +243,33 @@ fun WhoScreen(onPick: (Who) -> Unit) = Column(
                 Text(w.label, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 17.sp)
             }
         }
+    }
+}
+
+@Composable
+fun CrashScreen(texte: String, onRetry: () -> Unit) {
+    val ctx = LocalContext.current
+    val upd = remember { UpdateState() }
+    androidx.compose.runtime.LaunchedEffect(Unit) { upd.info = runCatching { Updater.check() }.getOrNull() }
+    Column(Modifier.fillMaxSize().safeDrawingPadding().padding(16.dp)) {
+        Logo(22)
+        Spacer(Modifier.height(10.dp))
+        UpdateBanner(upd)
+        Text("L'appli a planté", color = Red, fontWeight = FontWeight.Black, fontSize = 20.sp)
+        Text("Copie le rapport et envoie-le à Claude.", color = Muted, fontSize = 14.sp)
+        Spacer(Modifier.height(12.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Button(onClick = {
+                val cm = ctx.getSystemService(android.content.ClipboardManager::class.java)
+                cm?.setPrimaryClip(android.content.ClipData.newPlainText("Koalagenda", texte))
+                toast(ctx, "Rapport copié")
+            }) { Text("Copier le rapport", fontWeight = FontWeight.Bold) }
+            androidx.compose.material3.OutlinedButton(onClick = onRetry) { Text("Relancer", color = Yellow) }
+        }
+        Spacer(Modifier.height(12.dp))
+        Text(
+            texte, color = Color.White, fontSize = 11.sp,
+            modifier = Modifier.weight(1f).verticalScroll(androidx.compose.foundation.rememberScrollState()),
+        )
     }
 }

@@ -40,6 +40,25 @@ class MainActivity : ComponentActivity() {
             statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
         )
+        val crash = java.io.File(filesDir, "crash.txt")
+        val ancien = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler { t, e ->
+            runCatching {
+                crash.writeText("Koalagenda ${BuildConfig.VERSION_NAME} · Android ${Build.VERSION.RELEASE} · ${Build.MODEL}\n\n" + e.stackTraceToString())
+            }
+            ancien?.uncaughtException(t, e)
+        }
+        if (crash.exists()) {
+            val texte = runCatching { crash.readText() }.getOrDefault("")
+            setContent {
+                KoalagendaTheme {
+                    Surface(Modifier.fillMaxSize(), color = Navy) {
+                        CrashScreen(texte) { crash.delete(); recreate() }
+                    }
+                }
+            }
+            return
+        }
         Rappels.canal(this)
         val repo = Repo.get(this)
         repo.listen()
