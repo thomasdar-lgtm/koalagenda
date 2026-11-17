@@ -232,6 +232,40 @@ fun poserPeriode(
     return out
 }
 
+/** Jours de [w] où le remplacement Ordo est posé. */
+fun joursOrdo(jours: Map<String, Jour>, w: Who): Set<LocalDate> =
+    jours.values.filter { it.who == w && it.remplacement.isNotBlank() }.map { it.date }.toSet()
+
+/** Jours de [w] où [etat] est posé à la main. */
+fun joursEtat(jours: Map<String, Jour>, w: Who, etat: Etat): Set<LocalDate> =
+    jours.values.filter { it.who == w && it.etat == etat }.map { it.date }.toSet()
+
+/**
+ * Sélection multiple Ordo : pose Ordo sur [apres], l'enlève des jours de [avant] désélectionnés.
+ * Un jour de repos sélectionné passe en travail (on vient bosser).
+ */
+fun appliquerOrdo(
+    r: Roulement, jours: Map<String, Jour>, w: Who,
+    avant: Set<LocalDate>, apres: Set<LocalDate>, maintenant: Long,
+): List<Jour> = (avant + apres).sorted().mapNotNull { d ->
+    val j = jours[Jour.idDe(w, d)] ?: Jour(w, d)
+    val n = if (d in apres) {
+        val etat = if ((j.etat ?: r.etatAuto(d)).off) Etat.TRAVAIL else j.etat
+        j.copy(remplacement = "Ordo", etat = etat)
+    } else j.copy(remplacement = "")
+    if (n == j) null else n.copy(majLe = maintenant)
+}
+
+/** Sélection multiple congés/récups/fracs : pose [etat] sur [apres], le retire des jours désélectionnés. */
+fun appliquerEtat(
+    jours: Map<String, Jour>, w: Who, etat: Etat,
+    avant: Set<LocalDate>, apres: Set<LocalDate>, maintenant: Long,
+): List<Jour> = (avant + apres).sorted().mapNotNull { d ->
+    val j = jours[Jour.idDe(w, d)] ?: Jour(w, d)
+    val n = if (d in apres) j.copy(etat = etat) else if (j.etat == etat) j.copy(etat = null) else j
+    if (n == j) null else n.copy(majLe = maintenant)
+}
+
 data class Compteur(
     val conges: Int = 0,
     val recups: Int = 0,

@@ -87,6 +87,26 @@ class ModelTest {
         assertEquals(e, Enfants.fromMap(e.toMap()))
     }
 
+    @Test fun selectionMultiple() {
+        // Ordo sur un jour travaillé (ven 20/11) et un repos (sam 21/11)
+        val l = appliquerOrdo(thomas, emptyMap(), Who.THOMAS, emptySet(), setOf(d("2026-11-20"), d("2026-11-21")), 1)
+        assertEquals(2, l.size)
+        assertEquals(null, l[0].etat)
+        assertEquals(Etat.TRAVAIL, l[1].etat)
+        assertTrue(l.all { it.remplacement == "Ordo" })
+        val m = l.associateBy { it.id }
+        val retrait = appliquerOrdo(thomas, m, Who.THOMAS, joursOrdo(m, Who.THOMAS), setOf(d("2026-11-21")), 2)
+        assertEquals(listOf(d("2026-11-20")), retrait.map { it.date })
+        assertEquals("", retrait[0].remplacement)
+        // Congés
+        val c = appliquerEtat(emptyMap(), Who.CINDY, Etat.CONGE, emptySet(), setOf(d("2026-12-01"), d("2026-12-02")), 1)
+        val cm = c.associateBy { it.id }
+        assertEquals(setOf(d("2026-12-01"), d("2026-12-02")), joursEtat(cm, Who.CINDY, Etat.CONGE))
+        val c2 = appliquerEtat(cm, Who.CINDY, Etat.CONGE, joursEtat(cm, Who.CINDY, Etat.CONGE), setOf(d("2026-12-02")), 2)
+        assertEquals(1, c2.size)
+        assertEquals(null, c2[0].etat)
+    }
+
     @Test fun rappel() {
         val e = Evenement(date = d("2026-12-02"), heure = "14:30", rappel = 60)
         val attendu = d("2026-12-02").atTime(13, 30).toInstant(ZoneOffset.UTC).toEpochMilli()

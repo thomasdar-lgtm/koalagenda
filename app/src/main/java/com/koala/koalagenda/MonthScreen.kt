@@ -55,6 +55,18 @@ import java.time.temporal.ChronoUnit
 
 val FondEnfants = Color(0xFF123B45)
 
+/** Texte sans marge interne : centré pour de vrai dans les petites cases. */
+val Serre = androidx.compose.ui.text.TextStyle(
+    platformStyle = androidx.compose.ui.text.PlatformTextStyle(includeFontPadding = false),
+    lineHeightStyle = androidx.compose.ui.text.style.LineHeightStyle(
+        androidx.compose.ui.text.style.LineHeightStyle.Alignment.Center,
+        androidx.compose.ui.text.style.LineHeightStyle.Trim.Both,
+    ),
+)
+
+/** Saisie sur plusieurs jours (Ordo ou congés), sur un ou plusieurs mois. */
+data class Selection(val ordo: Boolean, val etat: Etat, val avant: Set<LocalDate>, val jours: Set<LocalDate>)
+
 @Composable
 fun MonthScreen(
     state: AgendaState,
@@ -66,7 +78,16 @@ fun MonthScreen(
     onEvent: (Evenement) -> Unit,
     onNewEvent: () -> Unit,
     onReglages: () -> Unit,
+    selection: Selection?,
+    onSelection: (Selection?) -> Unit,
+    onValider: (Selection) -> Unit,
 ) {
+    var menuPlus by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    androidx.activity.compose.BackHandler(enabled = selection != null) { onSelection(null) }
+    val clicJour: (LocalDate) -> Unit = { d ->
+        if (selection != null) onSelection(selection.copy(jours = if (d in selection.jours) selection.jours - d else selection.jours + d))
+        else onDay(d)
+    }
     val today = LocalDate.now()
     val parJour = state.evenements.filter { it.visiblePar(moi) }.groupBy { it.date }
     val estMoisCourant = mois == YearMonth.from(today)
@@ -86,10 +107,25 @@ fun MonthScreen(
                 Spacer(Modifier.weight(1f))
                 Box(Modifier.padding(end = 10.dp).size(7.dp).clip(CircleShape).background(if (state.pending) Yellow else Color.Transparent))
                 Avatar(moi, 30)
-                Box(
-                    Modifier.padding(start = 8.dp).size(36.dp).clip(CircleShape).background(Yellow).clickable { onNewEvent() },
-                    contentAlignment = Alignment.Center,
-                ) { Icon(Icons.Filled.Add, "Nouveau rdv", tint = Navy) }
+                Box {
+                    Box(
+                        Modifier.padding(start = 8.dp).size(36.dp).clip(CircleShape).background(Yellow).clickable { menuPlus = true },
+                        contentAlignment = Alignment.Center,
+                    ) { Icon(Icons.Filled.Add, "Ajouter", tint = Navy) }
+                    androidx.compose.material3.DropdownMenu(expanded = menuPlus, onDismissRequest = { menuPlus = false }) {
+                        androidx.compose.material3.DropdownMenuItem(text = { Text("Rdv") }, onClick = { menuPlus = false; onNewEvent() })
+                        androidx.compose.material3.DropdownMenuItem(text = { Text("Ordo") }, onClick = {
+                            menuPlus = false
+                            val a = joursOrdo(state.jours, moi)
+                            onSelection(Selection(true, Etat.TRAVAIL, a, a))
+                        })
+                        androidx.compose.material3.DropdownMenuItem(text = { Text("Congés") }, onClick = {
+                            menuPlus = false
+                            val a = joursEtat(state.jours, moi, Etat.CONGE)
+                            onSelection(Selection(false, Etat.CONGE, a, a))
+                        })
+                    }
+                }
                 Box(
                     Modifier.padding(start = 6.dp).size(40.dp).clip(CircleShape).clickable { onReglages() },
                     contentAlignment = Alignment.Center,
@@ -161,8 +197,9 @@ fun MonthScreen(
                     },
                     modifier = Modifier.fillMaxSize(),
                     label = "mois",
-                ) { m -> Grille(state, m, today, parJour, onDay) }
+                ) { m -> Grille(state, m, today, parJour, selection?.jours, clicJour) }
             }
+            if (selection != null) BarreSelection(state, moi, selection, onSelection, onValider)
         }
     }
 }
@@ -179,6 +216,7 @@ private fun Grille(
     mois: YearMonth,
     today: LocalDate,
     parJour: Map<LocalDate, List<Evenement>>,
+    choisis: Set<LocalDate>?,
     onDay: (LocalDate) -> Unit,
 ) {
     val debut = lundi(mois.atDay(1))
@@ -188,7 +226,7 @@ private fun Grille(
                 repeat(7) { j ->
                     val d = debut.plusDays((s * 7 + j).toLong())
                     Case(
-                        state, d, d.month == mois.month, d == today, parJour[d].orEmpty(),
+                        state, d, d.month == mois.month, d == today, parJour[d].orEmpty(), choisis?.contains(d),
                         Modifier.weight(1f).fillMaxHeight().padding(1.5.dp),
                     ) { onDay(d) }
                 }
@@ -206,27 +244,29 @@ private fun Case(
     dansLeMois: Boolean,
     aujourdhui: Boolean,
     evts: List<Evenement>,
+    choisi: Boolean?,
     modifier: Modifier,
     onClick: () -> Unit,
 ) {
     val fond = if (state.enfants.presents(d)) FondEnfants else Navy2
     BoxWithConstraints(
-        modifier.alpha(if (dansLeMois) 1f else 0.3f).clip(RoundedCornerShape(10.dp)).background(fond)
+        modifier.alpha(if (dansLeMois || choisi == true) 1f else 0.3f).clip(RoundedCornerShape(10.dp)).background(fond)
+            .then(if (choisi == true) Modifier.border(2.5.dp, Yellow, RoundedCornerShape(10.dp)) else Modifier)
             .clickable { onClick() }.padding(3.dp),
     ) {
         val gap = 3.dp
         val slot = minOf((maxWidth - gap) / 2, 26.dp)
-        val barre = 14.dp
-        val place = maxHeight - 18.dp - gap - slot - gap
+        val barre = 17.dp
+        val place = maxHeight - 22.dp - gap - slot - gap
         val lignes = (place / (barre + 2.dp)).toInt().coerceIn(0, 3)
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             Box(
-                Modifier.size(18.dp).clip(CircleShape).background(if (aujourdhui) Yellow else Color.Transparent),
+                Modifier.size(22.dp).clip(CircleShape).background(if (aujourdhui) Yellow else Color.Transparent),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    "${d.dayOfMonth}", fontSize = 11.sp, fontWeight = FontWeight.Black,
-                    color = if (aujourdhui) Navy else Color.White,
+                    "${d.dayOfMonth}", fontSize = 12.sp, fontWeight = FontWeight.Black, style = Serre,
+                    textAlign = TextAlign.Center, color = if (aujourdhui) Navy else Color.White,
                 )
             }
             Spacer(Modifier.height(gap))
@@ -257,14 +297,14 @@ private fun Emplacement(v: JourVu, couleur: Color, taille: androidx.compose.ui.u
         v.etat.off -> Box(
             Modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(couleur),
             contentAlignment = Alignment.Center,
-        ) { if (code.isNotEmpty()) Text(code, color = Navy, fontSize = 9.sp, fontWeight = FontWeight.Black) }
+        ) { if (code.isNotEmpty()) Text(code, color = Navy, fontSize = 10.sp, fontWeight = FontWeight.Black, style = Serre) }
 
         v.remplacement.isNotBlank() -> Box(
             Modifier.size(taille * 0.62f).clip(RoundedCornerShape(4.dp)).background(BleuRemplacement),
             contentAlignment = Alignment.Center,
-        ) { if (v.heureSup) Text("+1", color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.Black) }
+        ) { if (v.heureSup) Text("+1", color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Black, style = Serre) }
 
-        v.heureSup -> Text("+1", color = couleur, fontSize = 10.sp, fontWeight = FontWeight.Black)
+        v.heureSup -> Text("+1", color = couleur, fontSize = 11.sp, fontWeight = FontWeight.Black, style = Serre)
     }
 }
 
@@ -274,7 +314,39 @@ private fun Barre(texte: String, couleur: Color, hauteur: androidx.compose.ui.un
         .padding(horizontal = 3.dp),
     contentAlignment = Alignment.CenterStart,
 ) {
-    Text(texte, color = Navy, fontSize = 9.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Clip)
+    Text(texte, color = Navy, fontSize = 10.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Clip, style = Serre)
+}
+
+@Composable
+private fun BarreSelection(
+    state: AgendaState,
+    moi: Who,
+    sel: Selection,
+    onSelection: (Selection?) -> Unit,
+    onValider: (Selection) -> Unit,
+) = Column(
+    Modifier.fillMaxWidth().clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)).background(Navy3)
+        .padding(horizontal = 16.dp, vertical = 12.dp),
+) {
+    if (!sel.ordo) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf(Etat.CONGE, Etat.RECUP, Etat.FRAC).forEach { e ->
+                Choix(e.label, sel.etat == e, whoColor(moi)) {
+                    val a = joursEtat(state.jours, moi, e)
+                    onSelection(Selection(false, e, a, a))
+                }
+            }
+        }
+        Spacer(Modifier.height(10.dp))
+    }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            "${if (sel.ordo) "Ordo" else sel.etat.label} · ${sel.jours.size} j",
+            color = Color.White, fontWeight = FontWeight.Black, fontSize = 17.sp, modifier = Modifier.weight(1f),
+        )
+        androidx.compose.material3.TextButton(onClick = { onSelection(null) }) { Text("Annuler", color = Muted) }
+        androidx.compose.material3.Button(onClick = { onValider(sel) }) { Text("Valider", fontWeight = FontWeight.Bold) }
+    }
 }
 
 @Composable

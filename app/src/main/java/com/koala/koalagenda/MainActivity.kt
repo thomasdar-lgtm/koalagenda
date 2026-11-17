@@ -93,6 +93,7 @@ fun App(repo: Repo) {
 
     var screen by remember { mutableStateOf<Screen>(Screen.Month) }
     var mois by remember { mutableStateOf(YearMonth.now()) }
+    var selection by remember { mutableStateOf<Selection?>(null) }
     val state by repo.state.collectAsState()
     val upd = remember { UpdateState() }
     LaunchedEffect(Unit) { upd.info = runCatching { Updater.check() }.getOrNull() }
@@ -112,6 +113,16 @@ fun App(repo: Repo) {
                     screen = Screen.Event(nouveau(d), true, Screen.Month)
                 },
                 onReglages = { screen = Screen.Reglages },
+                selection = selection,
+                onSelection = { selection = it },
+                onValider = { sel ->
+                    val now = System.currentTimeMillis()
+                    val l = if (sel.ordo) appliquerOrdo(state.roulement(m), state.jours, m, sel.avant, sel.jours, now)
+                    else appliquerEtat(state.jours, m, sel.etat, sel.avant, sel.jours, now)
+                    repo.saveJours(l)
+                    toast(ctx, "${l.size} jour(s) modifié(s)")
+                    selection = null
+                },
             )
 
             Screen.Reglages -> ReglagesScreen(
