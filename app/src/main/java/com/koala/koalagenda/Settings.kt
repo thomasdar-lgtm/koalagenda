@@ -47,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.LocalDate
+import kotlinx.coroutines.launch
 
 /* ---------- Congés / récups / fracs sur une période ---------- */
 
@@ -249,4 +250,61 @@ private fun Ligne(label: String, valeur: String, color: Color) = Row(
 ) {
     Text(label, color = Muted, fontSize = 15.sp, modifier = Modifier.weight(1f))
     Text(valeur, color = color, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+}
+
+/* ---------- Réglages ---------- */
+
+@Composable
+fun ReglagesScreen(
+    moi: Who,
+    upd: UpdateState,
+    onRoulements: () -> Unit,
+    onCompteurs: () -> Unit,
+    onChangeMoi: () -> Unit,
+    onSignOut: () -> Unit,
+    onBack: () -> Unit,
+) {
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    var cherche by remember { mutableStateOf(false) }
+    BackHandler { onBack() }
+    Column(Modifier.fillMaxSize().safeDrawingPadding()) {
+        TopBar("Réglages", onBack)
+        UpdateBanner(upd)
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
+            Section("Application")
+            Carte {
+                Ligne("Version", BuildConfig.VERSION_NAME, Color.White)
+                Spacer(Modifier.height(10.dp))
+                Button(
+                    onClick = {
+                        cherche = true
+                        scope.launch {
+                            runCatching { Updater.check() }
+                                .onSuccess { i -> upd.info = i; if (i == null) toast(ctx, "Koalagenda est à jour (${BuildConfig.VERSION_NAME})") }
+                                .onFailure { toast(ctx, "Recherche impossible, vérifie ta connexion") }
+                            cherche = false
+                        }
+                    },
+                    enabled = !cherche, modifier = Modifier.fillMaxWidth(),
+                ) { Text(if (cherche) "Recherche…" else "Rechercher une mise à jour", fontWeight = FontWeight.Bold) }
+            }
+            Section("Planning")
+            LienReglage("Roulements", "Repos fixes, repos tournant, congés par an", onRoulements)
+            LienReglage("Compteurs", "Congés, récups, fracs, heures sup, remplacements", onCompteurs)
+            Section("Ce téléphone")
+            LienReglage("Je suis ${moi.label}", "Changer d'utilisateur", onChangeMoi)
+            LienReglage("Se déconnecter", "Compte commun", onSignOut)
+            Spacer(Modifier.height(24.dp))
+        }
+    }
+}
+
+@Composable
+private fun LienReglage(titre: String, sous: String, onClick: () -> Unit) = Column(
+    Modifier.fillMaxWidth().padding(bottom = 8.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(14.dp))
+        .background(Navy2).clickable { onClick() }.padding(14.dp),
+) {
+    Text(titre, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+    Text(sous, color = Muted, fontSize = 12.sp)
 }

@@ -25,8 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -58,13 +57,9 @@ fun MonthScreen(
     onDay: (LocalDate) -> Unit,
     onEvent: (Evenement) -> Unit,
     onNewEvent: () -> Unit,
-    onRoulements: () -> Unit,
-    onCompteurs: () -> Unit,
-    onChangeMoi: () -> Unit,
-    onSignOut: () -> Unit,
+    onReglages: () -> Unit,
 ) {
     val today = LocalDate.now()
-    var menu by remember { mutableStateOf(false) }
     val visibles = state.evenements.filter { it.visiblePar(moi) }
     val parJour = visibles.groupBy { it.date }
 
@@ -75,17 +70,12 @@ fun MonthScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Logo(22)
+                Text("v${BuildConfig.VERSION_NAME}", color = Muted, fontSize = 11.sp, modifier = Modifier.padding(start = 6.dp, top = 6.dp))
                 Spacer(Modifier.weight(1f))
                 if (state.pending) Text("synchro…", color = Muted, fontSize = 11.sp, modifier = Modifier.padding(end = 8.dp))
-                Box {
-                    Avatar(moi, 36) { menu = true }
-                    DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                        DropdownMenuItem(text = { Text("Roulements") }, onClick = { menu = false; onRoulements() })
-                        DropdownMenuItem(text = { Text("Compteurs (congés, récups…)") }, onClick = { menu = false; onCompteurs() })
-                        DropdownMenuItem(text = { Text("Je suis ${moi.label} · changer") }, onClick = { menu = false; onChangeMoi() })
-                        DropdownMenuItem(text = { Text("Se déconnecter") }, onClick = { menu = false; onSignOut() })
-                        DropdownMenuItem(text = { Text("Version ${BuildConfig.VERSION_NAME}", color = Muted) }, onClick = { menu = false })
-                    }
+                Avatar(moi, 32)
+                IconButton(onClick = onReglages) {
+                    Icon(Icons.Filled.Settings, "Réglages", tint = Color.White)
                 }
             }
             UpdateBanner(upd)

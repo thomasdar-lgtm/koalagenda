@@ -31,6 +31,7 @@ sealed interface Screen {
     data class Periode(val debut: LocalDate, val from: Screen) : Screen
     data object Roulements : Screen
     data object Compteurs : Screen
+    data object Reglages : Screen
 }
 
 class MainActivity : ComponentActivity() {
@@ -109,10 +110,16 @@ fun App(repo: Repo) {
                     val d = if (YearMonth.from(today) == mois) today else mois.atDay(1)
                     screen = Screen.Event(nouveau(d), true, Screen.Month)
                 },
+                onReglages = { screen = Screen.Reglages },
+            )
+
+            Screen.Reglages -> ReglagesScreen(
+                m, upd,
                 onRoulements = { screen = Screen.Roulements },
                 onCompteurs = { screen = Screen.Compteurs },
-                onChangeMoi = { repo.moi = null; moi = null },
-                onSignOut = { repo.signOut(); signedIn = false },
+                onChangeMoi = { repo.moi = null; moi = null; screen = Screen.Month },
+                onSignOut = { repo.signOut(); signedIn = false; screen = Screen.Month },
+                onBack = { screen = Screen.Month },
             )
 
             is Screen.Day -> DayScreen(
@@ -148,11 +155,11 @@ fun App(repo: Repo) {
 
             Screen.Roulements -> RoulementScreen(
                 state, m,
-                onSave = { w, r -> repo.saveRoulement(w, r); toast(ctx, "Roulement de ${w.label} enregistré"); screen = Screen.Month },
-                onBack = { screen = Screen.Month },
+                onSave = { w, r -> repo.saveRoulement(w, r); toast(ctx, "Roulement de ${w.label} enregistré"); screen = Screen.Reglages },
+                onBack = { screen = Screen.Reglages },
             )
 
-            Screen.Compteurs -> CompteursScreen(state, onBack = { screen = Screen.Month })
+            Screen.Compteurs -> CompteursScreen(state, onBack = { screen = Screen.Reglages })
         }
     }
 }
