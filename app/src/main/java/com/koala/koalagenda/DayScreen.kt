@@ -72,6 +72,13 @@ fun DayScreen(
 
     Column(Modifier.fillMaxSize().safeDrawingPadding().imePadding()) {
         TopBar(fmtJour(date) + " " + date.year, onBack = { quitter() })
+        ferie(date)?.let { nom ->
+            Text(
+                "Férié · $nom", color = Navy, fontWeight = FontWeight.Bold, fontSize = 13.sp,
+                modifier = Modifier.padding(start = 16.dp, bottom = 8.dp).clip(RoundedCornerShape(50))
+                    .background(CouleurFerie).padding(horizontal = 12.dp, vertical = 4.dp),
+            )
+        }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
             ordre.forEach { w ->
                 val j = if (w == Who.THOMAS) jt else jc

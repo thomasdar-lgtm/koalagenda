@@ -350,3 +350,34 @@ data class Evenement(
 
 /** Trie : journées entières d'abord, puis par heure. */
 fun trierEvenements(l: List<Evenement>) = l.sortedWith(compareBy({ it.date }, { if (it.journee) "" else it.heure }, { it.titre }))
+
+/** Dimanche de Pâques (algorithme de Meeus). */
+fun paques(annee: Int): LocalDate {
+    val a = annee % 19; val b = annee / 100; val c = annee % 100
+    val d = b / 4; val e = b % 4; val f = (b + 8) / 25; val g = (b - f + 1) / 3
+    val h = (19 * a + b - d - g + 15) % 30; val i = c / 4; val k = c % 4
+    val l = (32 + 2 * e + 2 * i - h - k) % 7; val m = (a + 11 * h + 22 * l) / 451
+    val mois = (h + l - 7 * m + 114) / 31; val jour = (h + l - 7 * m + 114) % 31 + 1
+    return LocalDate.of(annee, mois, jour)
+}
+
+private val cacheFeries = java.util.concurrent.ConcurrentHashMap<Int, Map<LocalDate, String>>()
+
+fun feries(annee: Int): Map<LocalDate, String> = cacheFeries.getOrPut(annee) {
+    val p = paques(annee)
+    mapOf(
+        LocalDate.of(annee, 1, 1) to "Jour de l'an",
+        p.plusDays(1) to "Lundi de Pâques",
+        LocalDate.of(annee, 5, 1) to "Fête du Travail",
+        LocalDate.of(annee, 5, 8) to "Victoire 1945",
+        p.plusDays(39) to "Ascension",
+        p.plusDays(50) to "Lundi de Pentecôte",
+        LocalDate.of(annee, 7, 14) to "Fête nationale",
+        LocalDate.of(annee, 8, 15) to "Assomption",
+        LocalDate.of(annee, 11, 1) to "Toussaint",
+        LocalDate.of(annee, 11, 11) to "Armistice",
+        LocalDate.of(annee, 12, 25) to "Noël",
+    )
+}
+
+fun ferie(d: LocalDate): String? = feries(d.year)[d]

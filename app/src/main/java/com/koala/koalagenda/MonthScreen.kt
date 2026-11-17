@@ -56,6 +56,7 @@ import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
 val FondEnfants = Color(0xFF123B45)
+val CouleurFerie = Color(0xFFFF9F43)
 
 /** Texte sans marge interne : centré pour de vrai dans les petites cases. */
 val Serre = androidx.compose.ui.text.TextStyle(
@@ -263,12 +264,14 @@ private fun Case(
         val lignes = (place / (barre + 2.dp)).toInt().coerceIn(0, 3)
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             Box(
-                Modifier.size(22.dp).clip(CircleShape).background(if (aujourdhui) Yellow else Color.Transparent),
+                Modifier.size(22.dp).clip(CircleShape).background(if (aujourdhui) Yellow else Color.Transparent)
+                    .then(if (ferie(d) != null && !aujourdhui) Modifier.border(1.5.dp, CouleurFerie, CircleShape) else Modifier),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     "${d.dayOfMonth}", fontSize = 12.sp, fontWeight = FontWeight.Black, style = Serre,
-                    textAlign = TextAlign.Center, color = if (aujourdhui) Navy else Color.White,
+                    textAlign = TextAlign.Center,
+                    color = when { aujourdhui -> Navy; ferie(d) != null -> CouleurFerie; else -> Color.White },
                 )
             }
             Spacer(Modifier.height(gap))

@@ -107,6 +107,18 @@ class ModelTest {
         assertEquals(null, c2[0].etat)
     }
 
+    @Test fun joursFeries() {
+        assertEquals(d("2026-04-05"), paques(2026))
+        assertEquals(d("2027-03-28"), paques(2027))
+        assertEquals(d("2025-04-20"), paques(2025))
+        assertEquals("Lundi de Pâques", ferie(d("2026-04-06")))
+        assertEquals("Ascension", ferie(d("2026-05-14")))
+        assertEquals("Lundi de Pentecôte", ferie(d("2026-05-25")))
+        assertEquals("Noël", ferie(d("2026-12-25")))
+        assertEquals(null, ferie(d("2026-12-24")))
+        assertEquals(11, feries(2027).size)
+    }
+
     @Test fun rappel() {
         val e = Evenement(date = d("2026-12-02"), heure = "14:30", rappel = 60)
         val attendu = d("2026-12-02").atTime(13, 30).toInstant(ZoneOffset.UTC).toEpochMilli()

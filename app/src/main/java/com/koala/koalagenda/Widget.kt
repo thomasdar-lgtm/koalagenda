@@ -173,7 +173,7 @@ private fun Contenu(data: WidgetData?) {
                             Text(
                                 "${d.dayOfMonth}",
                                 style = TextStyle(
-                                    color = cp(if (d == today) Navy else Color.White), fontSize = 12.sp,
+                                    color = cp(if (d == today) Navy else if (ferie(d) != null) CouleurFerie else Color.White), fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold, textAlign = TextAlign.Center,
                                 ),
                             )
