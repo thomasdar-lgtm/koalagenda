@@ -19,7 +19,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
@@ -70,7 +76,7 @@ fun DayScreen(
             ordre.forEach { w ->
                 val j = if (w == Who.THOMAS) jt else jc
                 CarteJour(state.roulement(w), j) { n -> if (w == Who.THOMAS) jt = n else jc = n }
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(8.dp))
             }
 
             val evts = state.evenements.filter { it.date == date && it.visiblePar(moi) }
@@ -103,42 +109,50 @@ private fun sauver(repo: Repo, jt: Jour, jc: Jour, init: List<Jour>) {
 private fun CarteJour(r: Roulement, j: Jour, onChange: (Jour) -> Unit) {
     val v = jourVu(r, j, j.date)
     val couleur = whoColor(j.who)
-    Column(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Navy2),
-    ) {
+    var ouvert by remember(j.who, j.date) { mutableStateOf(false) }
+    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Navy2)) {
         Row(
-            Modifier.fillMaxWidth()
-                .background(if (v.etat.off) couleur else Navy3)
-                .padding(horizontal = 14.dp, vertical = 12.dp),
+            Modifier.fillMaxWidth().clickable { ouvert = !ouvert }.padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                j.who.label, color = if (v.etat.off) Navy else Color.White,
-                fontWeight = FontWeight.Black, fontSize = 18.sp, modifier = Modifier.weight(1f),
-            )
-            Text(
-                if (v.etat == Etat.TRAVAIL) (if (v.heureSup) "4h – 12h21" else "5h – 12h21") else v.etat.label,
-                color = if (v.etat.off) Navy else couleur, fontWeight = FontWeight.Black, fontSize = 15.sp,
+            Box(Modifier.size(12.dp).clip(RoundedCornerShape(3.dp)).background(couleur))
+            Spacer(Modifier.width(10.dp))
+            Text(j.who.label, color = Color.White, fontWeight = FontWeight.Black, fontSize = 17.sp, modifier = Modifier.weight(1f))
+            val resume = buildString {
+                append(if (v.etat == Etat.TRAVAIL) (if (v.heureSup) "4h – 12h21" else "5h – 12h21") else v.etat.label)
+                if (v.remplacement.isNotBlank()) append(" · ").append(v.remplacement)
+            }
+            Text(resume, color = if (v.etat.off) couleur else Muted, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+            Icon(
+                if (ouvert) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown, null,
+                tint = Muted, modifier = Modifier.padding(start = 6.dp),
             )
         }
-        Column(Modifier.padding(14.dp)) {
+        if (ouvert) Column(Modifier.padding(start = 14.dp, end = 14.dp, bottom = 14.dp)) {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Choix("Auto", j.etat == null, Muted) { onChange(j.copy(etat = null)) }
                 Etat.entries.forEach { e -> Choix(e.label, j.etat == e, couleur) { onChange(j.copy(etat = e)) } }
             }
             if (v.etat == Etat.TRAVAIL) {
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("Heure sup", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp, modifier = Modifier.weight(1f))
                     Switch(checked = j.heureSup, onCheckedChange = { onChange(j.copy(heureSup = it)) })
                 }
-                Spacer(Modifier.height(6.dp))
-                OutlinedTextField(
-                    j.remplacement, { onChange(j.copy(remplacement = it)) },
-                    label = { Text("Remplacement") }, singleLine = true, modifier = Modifier.fillMaxWidth(),
-                )
+                Row(
+                    Modifier.fillMaxWidth().clickable {
+                        onChange(j.copy(remplacement = if (j.remplacement.isBlank()) "Ordo" else ""))
+                    },
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text("Ordo", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp, modifier = Modifier.weight(1f))
+                    Checkbox(
+                        checked = j.remplacement.isNotBlank(),
+                        onCheckedChange = { onChange(j.copy(remplacement = if (it) "Ordo" else "")) },
+                    )
+                }
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(4.dp))
             OutlinedTextField(
                 j.note, { onChange(j.copy(note = it)) },
                 label = { Text("Note") }, singleLine = true, modifier = Modifier.fillMaxWidth(),

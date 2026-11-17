@@ -197,31 +197,7 @@ private fun Grille(
     }
 }
 
-/** Une case carrée dans un jour : repos/congé (pleine) ou évènement (contour). */
-private data class Tuile(val couleur: Color, val texte: String, val pleine: Boolean)
-
-@Composable
-private fun tuiles(state: AgendaState, d: LocalDate, evts: List<Evenement>): List<Tuile> {
-    val l = mutableListOf<Tuile>()
-    Who.entries.forEach { w ->
-        val c = whoColor(w)
-        val v = state.vu(w, d)
-        when (v.etat) {
-            Etat.REPOS -> l += Tuile(c, "", true)
-            Etat.CONGE -> l += Tuile(c, "CP", true)
-            Etat.RECUP -> l += Tuile(c, "RC", true)
-            Etat.FRAC -> l += Tuile(c, "FR", true)
-            Etat.TRAVAIL -> {}
-        }
-        if (v.heureSup) l += Tuile(c, "+1", false)
-        if (v.remplacement.isNotBlank()) l += Tuile(c, "⇄", false)
-        evts.filter { it.pour == w.id }.forEach { l += Tuile(c, w.initiale, false) }
-    }
-    evts.filter { Who.of(it.pour) == null }.forEach { e ->
-        l += Tuile(Yellow, e.titre.trim().take(1).uppercase().ifBlank { "•" }, false)
-    }
-    return l
-}
+val BleuRemplacement = Color(0xFF3D8BFF)
 
 @Composable
 private fun Case(
@@ -233,18 +209,17 @@ private fun Case(
     modifier: Modifier,
     onClick: () -> Unit,
 ) {
-    val items = tuiles(state, d, evts)
     val fond = if (state.enfants.presents(d)) FondEnfants else Navy2
     BoxWithConstraints(
         modifier.alpha(if (dansLeMois) 1f else 0.3f).clip(RoundedCornerShape(10.dp)).background(fond)
             .clickable { onClick() }.padding(3.dp),
     ) {
         val gap = 3.dp
-        val tuile = (maxWidth - gap) / 2
-        val lignes = ((maxHeight - 18.dp - gap) / (tuile + gap)).toInt().coerceAtLeast(1)
-        val max = lignes * 2
-        val montrees = if (items.size > max) items.take(max - 1) + Tuile(Muted, "+${items.size - max + 1}", false) else items
-        Column(verticalArrangement = Arrangement.spacedBy(gap)) {
+        val slot = minOf((maxWidth - gap) / 2, 26.dp)
+        val barre = 14.dp
+        val place = maxHeight - 18.dp - gap - slot - gap
+        val lignes = (place / (barre + 2.dp)).toInt().coerceIn(0, 3)
+        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             Box(
                 Modifier.size(18.dp).clip(CircleShape).background(if (aujourdhui) Yellow else Color.Transparent),
                 contentAlignment = Alignment.Center,
@@ -254,28 +229,52 @@ private fun Case(
                     color = if (aujourdhui) Navy else Color.White,
                 )
             }
-            montrees.chunked(2).forEach { ligne ->
-                Row(horizontalArrangement = Arrangement.spacedBy(gap)) {
-                    ligne.forEach { t -> Carre(t, tuile) }
-                }
+            Spacer(Modifier.height(gap))
+            // Ligne des repos : Thomas à gauche, Cindy à droite
+            Row(horizontalArrangement = Arrangement.spacedBy(gap)) {
+                Who.entries.forEach { w -> Emplacement(state.vu(w, d), whoColor(w), slot) }
+            }
+            // Rdv et évènements, une ligne chacun
+            if (lignes > 0 && evts.isNotEmpty()) {
+                Spacer(Modifier.height(gap))
+                val montres = if (evts.size > lignes) evts.take(lignes - 1) else evts
+                montres.forEach { e -> Barre(e.titre.ifBlank { "Rdv" }, pourColor(e.pour), barre) }
+                if (evts.size > lignes) Barre("+${evts.size - montres.size}", Muted, barre)
             }
         }
     }
 }
 
+/** Repos/congé (carré plein), sinon remplacement (petit carré bleu) et heure sup. */
 @Composable
-private fun Carre(t: Tuile, taille: androidx.compose.ui.unit.Dp) = Box(
-    Modifier.size(taille).clip(RoundedCornerShape(5.dp))
-        .then(
-            if (t.pleine) Modifier.background(t.couleur)
-            else Modifier.background(Navy).border(1.5.dp, t.couleur, RoundedCornerShape(5.dp))
-        ),
-    contentAlignment = Alignment.Center,
+private fun Emplacement(v: JourVu, couleur: Color, taille: androidx.compose.ui.unit.Dp) = Box(
+    Modifier.size(taille), contentAlignment = Alignment.Center,
 ) {
-    if (t.texte.isNotEmpty()) Text(
-        t.texte, color = if (t.pleine) Navy else t.couleur,
-        fontSize = 9.sp, fontWeight = FontWeight.Black, maxLines = 1,
-    )
+    val code = when (v.etat) {
+        Etat.CONGE -> "CP"; Etat.RECUP -> "RC"; Etat.FRAC -> "FR"; else -> ""
+    }
+    when {
+        v.etat.off -> Box(
+            Modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(couleur),
+            contentAlignment = Alignment.Center,
+        ) { if (code.isNotEmpty()) Text(code, color = Navy, fontSize = 9.sp, fontWeight = FontWeight.Black) }
+
+        v.remplacement.isNotBlank() -> Box(
+            Modifier.size(taille * 0.62f).clip(RoundedCornerShape(4.dp)).background(BleuRemplacement),
+            contentAlignment = Alignment.Center,
+        ) { if (v.heureSup) Text("+1", color = Color.White, fontSize = 8.sp, fontWeight = FontWeight.Black) }
+
+        v.heureSup -> Text("+1", color = couleur, fontSize = 10.sp, fontWeight = FontWeight.Black)
+    }
+}
+
+@Composable
+private fun Barre(texte: String, couleur: Color, hauteur: androidx.compose.ui.unit.Dp) = Box(
+    Modifier.fillMaxWidth().padding(bottom = 2.dp).height(hauteur).clip(RoundedCornerShape(4.dp)).background(couleur)
+        .padding(horizontal = 3.dp),
+    contentAlignment = Alignment.CenterStart,
+) {
+    Text(texte, color = Navy, fontSize = 9.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Clip)
 }
 
 @Composable
