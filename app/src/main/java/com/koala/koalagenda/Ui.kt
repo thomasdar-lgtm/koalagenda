@@ -97,24 +97,24 @@ object Theme {
             "Volcan" to mapOf("fond" to 0xFF120404, "cases" to 0xFF2E0E08, "accent" to 0xFFFF5722, "enfants" to 0xFF3D2A14, "ferie" to 0xFFFFCC00, "remplacement" to 0xFF3D8BFF),
             "Glacier" to mapOf("fond" to 0xFF061418, "cases" to 0xFF12303A, "accent" to 0xFF7FFFD4, "enfants" to 0xFF14385E, "ferie" to 0xFFFF9F43, "remplacement" to 0xFF9FD8FF),
             "Bonbon" to mapOf("fond" to 0xFF1A0614, "cases" to 0xFF3A1230, "accent" to 0xFFFFB3DE, "enfants" to 0xFF14385E, "ferie" to 0xFFFFCC00, "remplacement" to 0xFF9FD8FF),
-            "Jour" to mapOf("fond" to 0xFFF4F6FB, "cases" to 0xFFFFFFFF, "accent" to 0xFFF5A700, "enfants" to 0xFFD5F0F3, "ferie" to 0xFFE8590C, "remplacement" to 0xFF2F6FED),
-            "Lin" to mapOf("fond" to 0xFFF5F0E8, "cases" to 0xFFFFFDF8, "accent" to 0xFFE0A33A, "enfants" to 0xFFE3EED8, "ferie" to 0xFFD9480F, "remplacement" to 0xFF3D7BD9),
-            "Rosée" to mapOf("fond" to 0xFFFBF0F4, "cases" to 0xFFFFFFFF, "accent" to 0xFFFF8FB1, "enfants" to 0xFFE7F0FA, "ferie" to 0xFFF08C00, "remplacement" to 0xFF4263EB),
-            "Menthe claire" to mapOf("fond" to 0xFFEEF7F3, "cases" to 0xFFFFFFFF, "accent" to 0xFF38D9A9, "enfants" to 0xFFFFF3D6, "ferie" to 0xFFE8590C, "remplacement" to 0xFF1C7ED6),
-            "Ciel" to mapOf("fond" to 0xFFEEF4FB, "cases" to 0xFFFFFFFF, "accent" to 0xFF74C0FC, "enfants" to 0xFFFFF0D9, "ferie" to 0xFFE8590C, "remplacement" to 0xFF7048E8),
-            "Lavande claire" to mapOf("fond" to 0xFFF3F0FA, "cases" to 0xFFFFFFFF, "accent" to 0xFFB197FC, "enfants" to 0xFFDDF3EE, "ferie" to 0xFFF08C00, "remplacement" to 0xFF1C7ED6),
-            "Sable" to mapOf("fond" to 0xFFF7F1E6, "cases" to 0xFFFFFCF5, "accent" to 0xFFFFC078, "enfants" to 0xFFDCEBF5, "ferie" to 0xFFC92A2A, "remplacement" to 0xFF2F6FED),
-            "Papier" to mapOf("fond" to 0xFFF1F3F5, "cases" to 0xFFFFFFFF, "accent" to 0xFFFAB005, "enfants" to 0xFFD3EFE6, "ferie" to 0xFFE8590C, "remplacement" to 0xFF1971C2),
+            "Jour" to mapOf("fond" to 0xFFD9DEE7, "cases" to 0xFFE8EBF1, "accent" to 0xFFE0A100, "enfants" to 0xFFC6DDE0, "ferie" to 0xFFD9480F, "remplacement" to 0xFF2F6FED),
+            "Lin" to mapOf("fond" to 0xFFE2DBCF, "cases" to 0xFFEEE8DE, "accent" to 0xFFC98A2E, "enfants" to 0xFFD3DEC6, "ferie" to 0xFFC2410C, "remplacement" to 0xFF3D7BD9),
+            "Rosée" to mapOf("fond" to 0xFFE7D9DF, "cases" to 0xFFF1E7EB, "accent" to 0xFFD9658B, "enfants" to 0xFFD3DEEA, "ferie" to 0xFFE07800, "remplacement" to 0xFF4263EB),
+            "Menthe claire" to mapOf("fond" to 0xFFD5E3DC, "cases" to 0xFFE4EEE9, "accent" to 0xFF22A57A, "enfants" to 0xFFECE0C2, "ferie" to 0xFFD9480F, "remplacement" to 0xFF1C7ED6),
+            "Ciel" to mapOf("fond" to 0xFFD6E0EC, "cases" to 0xFFE5ECF4, "accent" to 0xFF3D8FD9, "enfants" to 0xFFECDEC6, "ferie" to 0xFFD9480F, "remplacement" to 0xFF7048E8),
+            "Lavande claire" to mapOf("fond" to 0xFFDDD8EA, "cases" to 0xFFEAE6F3, "accent" to 0xFF8A6FD9, "enfants" to 0xFFCFE3DD, "ferie" to 0xFFE07800, "remplacement" to 0xFF1C7ED6),
+            "Sable" to mapOf("fond" to 0xFFE3D9C6, "cases" to 0xFFEFE8DA, "accent" to 0xFFD9893A, "enfants" to 0xFFCFDCE6, "ferie" to 0xFFB91C1C, "remplacement" to 0xFF2F6FED),
+            "Papier" to mapOf("fond" to 0xFFDADDE1, "cases" to 0xFFE8EAED, "accent" to 0xFFD9A000, "enfants" to 0xFFC9DDD4, "ferie" to 0xFFD9480F, "remplacement" to 0xFF1971C2),
             "Minuit doré" to mapOf("fond" to 0xFF05060F, "cases" to 0xFF14182E, "accent" to 0xFFE8C468, "enfants" to 0xFF123B45, "ferie" to 0xFFFF9F43, "remplacement" to 0xFF5AA9FF),
         )
 
     /** Choix proposés pour chaque couleur. */
     val CHOIX: List<Triple<String, String, List<Long>>>
         get() = listOf(
-            Triple("fond", "Fond", listOf(0xFFF4F6FB, 0xFFF5F0E8, 0xFFFBF0F4, 0xFFEEF7F3, 0xFF00071A, 0xFF0B0B0F, 0xFF06120C, 0xFF12061A, 0xFF101820, 0xFF1B1206, 0xFF06161F, 0xFF15151A)),
-            Triple("cases", "Cases", listOf(0xFFFFFFFF, 0xFFFFFDF8, 0xFFE9ECF2, 0xFF0D1733, 0xFF1E1E26, 0xFF12291C, 0xFF2A1430, 0xFF1C2833, 0xFF2A1F10, 0xFF0D2A38, 0xFF2B2B33)),
+            Triple("fond", "Fond", listOf(0xFFD9DEE7, 0xFFE2DBCF, 0xFFE7D9DF, 0xFFD5E3DC, 0xFF00071A, 0xFF0B0B0F, 0xFF06120C, 0xFF12061A, 0xFF101820, 0xFF1B1206, 0xFF06161F, 0xFF15151A)),
+            Triple("cases", "Cases", listOf(0xFFE8EBF1, 0xFFEEE8DE, 0xFFF1E7EB, 0xFF0D1733, 0xFF1E1E26, 0xFF12291C, 0xFF2A1430, 0xFF1C2833, 0xFF2A1F10, 0xFF0D2A38, 0xFF2B2B33)),
             Triple("accent", "Accent", listOf(0xFFFFCC00, 0xFFFF9F43, 0xFFFF6B6B, 0xFFFF7EB6, 0xFFB57BFF, 0xFF5AA9FF, 0xFF2ED3C6, 0xFFC6E06B)),
-            Triple("enfants", "Semaine enfants", listOf(0xFFD5F0F3, 0xFFE3EED8, 0xFFFFF3D6, 0xFFE7F0FA, 0xFF123B45, 0xFF1E4D2B, 0xFF4A2350, 0xFF3A3A12, 0xFF14385E, 0xFF4D2A14, 0xFF0F4F4F, 0xFF3D1F1F)),
+            Triple("enfants", "Semaine enfants", listOf(0xFFC6DDE0, 0xFFD3DEC6, 0xFFECE0C2, 0xFFD3DEEA, 0xFF123B45, 0xFF1E4D2B, 0xFF4A2350, 0xFF3A3A12, 0xFF14385E, 0xFF4D2A14, 0xFF0F4F4F, 0xFF3D1F1F)),
             Triple("ferie", "Férié", listOf(0xFFFF9F43, 0xFFFF6B6B, 0xFFFFCC00, 0xFFB57BFF, 0xFF2ED3C6, 0xFFFF7EB6, 0xFFC6E06B, 0xFF5AA9FF)),
             Triple("remplacement", "Ordo", listOf(0xFF3D8BFF, 0xFF2ED3C6, 0xFFB57BFF, 0xFFFF9F43, 0xFFFF6B6B, 0xFFC6E06B, 0xFFFF7EB6, 0xFFE0E6F5)),
         )
@@ -148,9 +148,9 @@ object Theme {
 }
 
 /** Thème clair : fond lumineux, texte foncé. */
-val Clair: Boolean get() = Theme.fond.luminance() > 0.5f
+val Clair: Boolean get() = Theme.fond.luminance() > 0.4f
 /** Texte principal (blanc sur thème sombre, foncé sur thème clair). */
-val Encre: Color get() = if (Clair) Color(0xFF151A2C) else Color.White
+val Encre: Color get() = if (Clair) Color(0xFF262B38) else Color.White
 /** Texte posé sur une couleur vive (pastilles, carrés, boutons) : toujours foncé. */
 val Sombre: Color get() = Color(0xFF0B0F1A)
 val Navy: Color get() = Theme.fond
@@ -159,7 +159,7 @@ val Navy3: Color get() = androidx.compose.ui.graphics.lerp(Theme.cases, Encre, i
 val Navy4: Color get() = androidx.compose.ui.graphics.lerp(Theme.cases, Encre, if (Clair) 0.12f else 0.14f)
 val Yellow: Color get() = Theme.accent
 val Blue = Color(0xFF5AA9FF)
-val Muted: Color get() = if (Clair) Color(0xFF5B6478) else Color(0xFFB7C0D8)
+val Muted: Color get() = if (Clair) Color(0xFF626A7A) else Color(0xFFB7C0D8)
 val Green = Color(0xFF4CC38A)
 val Pink = Color(0xFFFF7EB6)
 val Purple = Color(0xFFB57BFF)
