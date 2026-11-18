@@ -12,8 +12,8 @@ android {
         applicationId = "com.koala.koalagenda"
         minSdk = 26
         targetSdk = 35
-        versionCode = 15
-        versionName = "1.10.0"
+        versionCode = 16
+        versionName = "1.11.0"
         ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a") }
     }
 

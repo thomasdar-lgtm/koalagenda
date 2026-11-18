@@ -348,9 +348,11 @@ private fun LienReglage(titre: String, onClick: () -> Unit) = Column(
     Text(titre, color = Encre, fontWeight = FontWeight.Bold, fontSize = 16.sp)
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ChoixCouleur(w: Who, onCouleur: (Who, Long) -> Unit) {
-    val actuelle = LocalCouleurs.current[w]
+    val actuelle = LocalCouleurs.current[w] ?: COULEURS_DEFAUT.getValue(w)
+    var nuancier by remember { mutableStateOf(false) }
     Carte(Modifier.padding(bottom = 8.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Avatar(w, 26)
@@ -358,16 +360,26 @@ private fun ChoixCouleur(w: Who, onCouleur: (Who, Long) -> Unit) {
             Text(w.label, color = Encre, fontWeight = FontWeight.Bold, fontSize = 16.sp)
         }
         Spacer(Modifier.height(10.dp))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            PALETTE.forEach { c ->
+        FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            val liste = if (actuelle in PALETTE) PALETTE else listOf(actuelle) + PALETTE
+            liste.forEach { c ->
                 Box(
-                    Modifier.size(26.dp).clip(CircleShape).background(Color(c))
+                    Modifier.size(28.dp).clip(CircleShape).background(Color(c))
                         .then(if (c == actuelle) Modifier.border(3.dp, Encre, CircleShape) else Modifier)
                         .clickable { onCouleur(w, c) },
                 )
             }
+            Box(
+                Modifier.size(28.dp).clip(CircleShape)
+                    .background(androidx.compose.ui.graphics.Brush.sweepGradient(
+                        listOf(Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta, Color.Red)
+                    ))
+                    .clickable { nuancier = true },
+                contentAlignment = Alignment.Center,
+            ) { Text("+", color = Color.White, fontWeight = FontWeight.Black, fontSize = 16.sp) }
         }
     }
+    if (nuancier) Nuancier(actuelle, onOk = { onCouleur(w, it); nuancier = false }, onDismiss = { nuancier = false })
 }
 
 @OptIn(ExperimentalLayoutApi::class)
