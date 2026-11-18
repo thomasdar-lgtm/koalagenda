@@ -300,9 +300,7 @@ fun ReglagesScreen(
             Section("Couleurs")
             Who.entries.forEach { w -> ChoixCouleur(w, onCouleur) }
             Section("Thème")
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Theme.PRESETS.forEach { (nom, m) -> Choix(nom, false, Muted) { Theme.preset(ctx, m) } }
-            }
+            Presets(ctx)
             Spacer(Modifier.height(10.dp))
             Theme.CHOIX.forEach { (cle, nom, options) ->
                 val actuelle = Theme.valeur(cle)
@@ -354,6 +352,32 @@ private fun ChoixCouleur(w: Who, onCouleur: (Who, Long) -> Unit) {
                         .clickable { onCouleur(w, c) },
                 )
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun Presets(ctx: android.content.Context) = FlowRow(
+    Modifier.fillMaxWidth(),
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
+    verticalArrangement = Arrangement.spacedBy(8.dp),
+) {
+    Theme.PRESETS.forEach { (nom, m) ->
+        val actif = m.all { (k, v) -> Theme.valeur(k) == v }
+        Row(
+            Modifier.clip(androidx.compose.foundation.shape.RoundedCornerShape(14.dp))
+                .background(Color(m.getValue("fond")))
+                .border(if (actif) 2.dp else 1.dp, if (actif) Color.White else Color(m.getValue("cases")), androidx.compose.foundation.shape.RoundedCornerShape(14.dp))
+                .clickable { Theme.preset(ctx, m) }
+                .padding(horizontal = 10.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            listOf("cases", "accent", "enfants").forEach { k ->
+                Box(Modifier.padding(end = 3.dp).size(12.dp).clip(CircleShape).background(Color(m.getValue(k))))
+            }
+            Spacer(Modifier.width(4.dp))
+            Text(nom, color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
