@@ -134,8 +134,8 @@ fun UpdateBanner(upd: UpdateState) {
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text("Nouvelle version disponible", color = Navy, fontWeight = FontWeight.Black, fontSize = 15.sp)
-                Text("Koalagenda ${info.version}", color = Navy, fontSize = 13.sp)
+                Text("Nouvelle version disponible", color = Sombre, fontWeight = FontWeight.Black, fontSize = 15.sp)
+                Text("Koalagenda ${info.version}", color = Sombre, fontSize = 13.sp)
             }
             val p = upd.progress
             if (p == null) {
@@ -154,15 +154,15 @@ fun UpdateBanner(upd: UpdateState) {
                             else runCatching { Updater.install(ctx, f) }.onFailure { toast(ctx, "Installation impossible") }
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Navy, contentColor = Yellow),
+                    colors = ButtonDefaults.buttonColors(containerColor = Sombre, contentColor = Yellow),
                 ) { Text("Installer", fontWeight = FontWeight.Bold) }
             } else {
-                Text("${(p * 100).toInt()} %", color = Navy, fontWeight = FontWeight.Bold)
+                Text("${(p * 100).toInt()} %", color = Sombre, fontWeight = FontWeight.Bold)
             }
         }
         upd.progress?.let {
             Spacer(Modifier.height(10.dp))
-            LinearProgressIndicator(progress = { it }, modifier = Modifier.fillMaxWidth(), color = Navy, trackColor = Navy.copy(alpha = 0.2f))
+            LinearProgressIndicator(progress = { it }, modifier = Modifier.fillMaxWidth(), color = Sombre, trackColor = Sombre.copy(alpha = 0.2f))
         }
     }
 }

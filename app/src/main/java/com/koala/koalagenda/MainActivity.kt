@@ -67,6 +67,12 @@ class MainActivity : ComponentActivity() {
         repo.listen()
         setContent {
             KoalagendaTheme {
+                val clair = Clair
+                LaunchedEffect(clair) {
+                    val style = if (clair) SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
+                    else SystemBarStyle.dark(android.graphics.Color.TRANSPARENT)
+                    this@MainActivity.enableEdgeToEdge(statusBarStyle = style, navigationBarStyle = style)
+                }
                 Surface(Modifier.fillMaxSize(), color = Navy) { App(repo) }
             }
         }

@@ -118,7 +118,7 @@ fun MonthScreen(
                     Box(
                         Modifier.padding(start = 8.dp).size(36.dp).clip(CircleShape).background(Yellow).clickable { menuPlus = true },
                         contentAlignment = Alignment.Center,
-                    ) { Icon(Icons.Filled.Add, "Ajouter", tint = Navy) }
+                    ) { Icon(Icons.Filled.Add, "Ajouter", tint = Sombre) }
                     androidx.compose.material3.DropdownMenu(expanded = menuPlus, onDismissRequest = { menuPlus = false }) {
                         androidx.compose.material3.DropdownMenuItem(text = { Text("Rdv") }, onClick = { menuPlus = false; onNewEvent() })
                         androidx.compose.material3.DropdownMenuItem(text = { Text("Ordo") }, onClick = {
@@ -154,7 +154,7 @@ fun MonthScreen(
             ) {
                 Text(
                     MOIS[mois.monthValue - 1].replaceFirstChar { it.uppercase() },
-                    color = Color.White, fontWeight = FontWeight.Black, fontSize = 26.sp, maxLines = 1,
+                    color = Encre, fontWeight = FontWeight.Black, fontSize = 26.sp, maxLines = 1,
                 )
                 Text(
                     " ${mois.year}", color = Muted.copy(alpha = 0.55f), fontWeight = FontWeight.Bold, fontSize = 26.sp,
@@ -165,13 +165,13 @@ fun MonthScreen(
                         .background(Yellow)
                         .clickable(enabled = !estMoisCourant) { onMois(YearMonth.from(today)) }
                         .padding(horizontal = 10.dp, vertical = 5.dp),
-                ) { Text("Auj.", color = Navy, fontWeight = FontWeight.Bold, fontSize = 13.sp) }
+                ) { Text("Auj.", color = Sombre, fontWeight = FontWeight.Bold, fontSize = 13.sp) }
                 RondBouton({ onMois(mois.minusMonths(1)) }) {
-                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, "Mois précédent", tint = Color.White)
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, "Mois précédent", tint = Encre)
                 }
                 Spacer(Modifier.width(6.dp))
                 RondBouton({ onMois(mois.plusMonths(1)) }) {
-                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, "Mois suivant", tint = Color.White)
+                    Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, "Mois suivant", tint = Encre)
                 }
             }
 
@@ -279,7 +279,7 @@ private fun Case(
                 Text(
                     "${d.dayOfMonth}", fontSize = 12.sp, fontWeight = FontWeight.Black, style = Serre,
                     textAlign = TextAlign.Center,
-                    color = when { aujourdhui -> Navy; ferie(d) != null -> CouleurFerie; else -> Color.White },
+                    color = when { aujourdhui -> Sombre; ferie(d) != null -> CouleurFerie; else -> Encre },
                 )
             }
             Spacer(Modifier.height(gap))
@@ -310,7 +310,7 @@ private fun Emplacement(v: JourVu, couleur: Color, taille: androidx.compose.ui.u
         v.etat.off -> Box(
             Modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)).background(couleur),
             contentAlignment = Alignment.Center,
-        ) { if (code.isNotEmpty()) Text(code, color = Navy, fontSize = 10.sp, fontWeight = FontWeight.Black, style = Serre) }
+        ) { if (code.isNotEmpty()) Text(code, color = Sombre, fontSize = 10.sp, fontWeight = FontWeight.Black, style = Serre) }
 
         v.remplacement.isNotBlank() -> Box(
             Modifier.size(taille * 0.62f).clip(RoundedCornerShape(4.dp)).background(BleuRemplacement),
@@ -327,7 +327,7 @@ private fun Barre(texte: String, couleur: Color, hauteur: androidx.compose.ui.un
         .padding(horizontal = 3.dp),
     contentAlignment = Alignment.CenterStart,
 ) {
-    Text(texte, color = Navy, fontSize = 10.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Clip, style = Serre)
+    Text(texte, color = Sombre, fontSize = 10.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Clip, style = Serre)
 }
 
 @Composable
@@ -355,7 +355,7 @@ private fun BarreSelection(
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
             if (sel.echange) "Échange · ${sel.jours.size}/2" else "${if (sel.ordo) "Ordo" else sel.etat.label} · ${sel.jours.size} j",
-            color = Color.White, fontWeight = FontWeight.Black, fontSize = 17.sp, modifier = Modifier.weight(1f),
+            color = Encre, fontWeight = FontWeight.Black, fontSize = 17.sp, modifier = Modifier.weight(1f),
         )
         androidx.compose.material3.TextButton(onClick = { onSelection(null) }) { Text("Annuler", color = Muted) }
         androidx.compose.material3.Button(onClick = { onValider(sel) }, enabled = !sel.echange || sel.jours.size == 2) { Text("Valider", fontWeight = FontWeight.Bold) }
@@ -370,7 +370,7 @@ fun LigneEvenement(e: Evenement, showDate: Boolean, onClick: () -> Unit) = Row(
 ) {
     if (showDate) {
         Column(Modifier.width(38.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("${e.date.dayOfMonth}", color = Color.White, fontWeight = FontWeight.Black, fontSize = 20.sp)
+            Text("${e.date.dayOfMonth}", color = Encre, fontWeight = FontWeight.Black, fontSize = 20.sp)
             Text(JOURS_LONGS[e.date.dayOfWeek.value - 1].take(3), color = Muted, fontSize = 11.sp)
         }
         Spacer(Modifier.width(10.dp))
@@ -379,7 +379,7 @@ fun LigneEvenement(e: Evenement, showDate: Boolean, onClick: () -> Unit) = Row(
     Spacer(Modifier.width(10.dp))
     Column(Modifier.weight(1f)) {
         Text(
-            e.titre.ifBlank { "Rdv" }, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp,
+            e.titre.ifBlank { "Rdv" }, color = Encre, fontWeight = FontWeight.Bold, fontSize = 15.sp,
             maxLines = 1, overflow = TextOverflow.Ellipsis,
         )
         Text(

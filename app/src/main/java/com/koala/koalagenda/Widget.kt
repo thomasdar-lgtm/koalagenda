@@ -174,7 +174,7 @@ private fun Contenu(data: WidgetData?) {
                             Text(
                                 "${d.dayOfMonth}",
                                 style = TextStyle(
-                                    color = cp(if (d == today) Navy else if (ferie(d) != null) CouleurFerie else Color.White), fontSize = 12.sp,
+                                    color = cp(if (d == today) Sombre else if (ferie(d) != null) CouleurFerie else Encre), fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold, textAlign = TextAlign.Center,
                                 ),
                             )
@@ -213,7 +213,7 @@ private fun Contenu(data: WidgetData?) {
                         if (!e.journee) append(" · ").append(e.heure.replace(":", "h"))
                         append(" · ").append(e.titre.ifBlank { "Rdv" })
                     },
-                    style = TextStyle(color = cp(Color.White), fontSize = 12.sp),
+                    style = TextStyle(color = cp(Encre), fontSize = 12.sp),
                     maxLines = 1,
                 )
             }

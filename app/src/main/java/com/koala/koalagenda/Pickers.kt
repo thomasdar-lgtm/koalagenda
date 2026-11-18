@@ -37,7 +37,7 @@ private fun Champ(label: String, valeur: String, modifier: Modifier, onClick: ()
         .padding(horizontal = 14.dp, vertical = 10.dp),
 ) {
     Text(label, color = Muted, fontSize = 12.sp)
-    Text(valeur, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+    Text(valeur, color = Encre, fontWeight = FontWeight.Bold, fontSize = 16.sp)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

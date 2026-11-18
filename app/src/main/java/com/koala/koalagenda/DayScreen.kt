@@ -74,7 +74,7 @@ fun DayScreen(
         TopBar(fmtJour(date) + " " + date.year, onBack = { quitter() })
         ferie(date)?.let { nom ->
             Text(
-                "Férié · $nom", color = Navy, fontWeight = FontWeight.Bold, fontSize = 13.sp,
+                "Férié · $nom", color = Sombre, fontWeight = FontWeight.Bold, fontSize = 13.sp,
                 modifier = Modifier.padding(start = 16.dp, bottom = 8.dp).clip(RoundedCornerShape(50))
                     .background(CouleurFerie).padding(horizontal = 12.dp, vertical = 4.dp),
             )
@@ -124,7 +124,7 @@ private fun CarteJour(r: Roulement, j: Jour, onChange: (Jour) -> Unit) {
         ) {
             Box(Modifier.size(12.dp).clip(RoundedCornerShape(3.dp)).background(couleur))
             Spacer(Modifier.width(10.dp))
-            Text(j.who.label, color = Color.White, fontWeight = FontWeight.Black, fontSize = 17.sp, modifier = Modifier.weight(1f))
+            Text(j.who.label, color = Encre, fontWeight = FontWeight.Black, fontSize = 17.sp, modifier = Modifier.weight(1f))
             val resume = buildString {
                 append(if (v.etat == Etat.TRAVAIL) (if (v.heureSup) "4h – 12h21" else "5h – 12h21") else v.etat.label)
                 if (v.remplacement.isNotBlank()) append(" · ").append(v.remplacement)
@@ -143,7 +143,7 @@ private fun CarteJour(r: Roulement, j: Jour, onChange: (Jour) -> Unit) {
             if (v.etat == Etat.TRAVAIL) {
                 Spacer(Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Heure sup", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp, modifier = Modifier.weight(1f))
+                    Text("Heure sup", color = Encre, fontWeight = FontWeight.Bold, fontSize = 15.sp, modifier = Modifier.weight(1f))
                     Switch(checked = j.heureSup, onCheckedChange = { onChange(j.copy(heureSup = it)) })
                 }
                 Row(
@@ -152,7 +152,7 @@ private fun CarteJour(r: Roulement, j: Jour, onChange: (Jour) -> Unit) {
                     },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text("Ordo", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp, modifier = Modifier.weight(1f))
+                    Text("Ordo", color = Encre, fontWeight = FontWeight.Bold, fontSize = 15.sp, modifier = Modifier.weight(1f))
                     Checkbox(
                         checked = j.remplacement.isNotBlank(),
                         onCheckedChange = { onChange(j.copy(remplacement = if (it) "Ordo" else "")) },

@@ -120,7 +120,7 @@ private fun JoursChips(sel: Set<Int>, couleur: Color, onToggle: (Int) -> Unit) =
         Box(
             Modifier.size(38.dp).clip(CircleShape).background(if (on) couleur else Navy3).clickable { onToggle(j) },
             contentAlignment = Alignment.Center,
-        ) { Text(l, color = if (on) Navy else Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp) }
+        ) { Text(l, color = if (on) Sombre else Encre, fontWeight = FontWeight.Bold, fontSize = 14.sp) }
     }
 }
 
@@ -143,7 +143,7 @@ private fun EditeurRoulement(who: Who, r0: Roulement, onSave: (Roulement) -> Uni
         cycle.forEachIndexed { i, s ->
             Carte(Modifier.padding(bottom = 8.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Semaine ${i + 1}", color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                    Text("Semaine ${i + 1}", color = Encre, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
                     Choix("En cours", actuelle == i) { actuelle = i }
                 }
                 Spacer(Modifier.height(8.dp))
@@ -176,7 +176,7 @@ private fun EditeurRoulement(who: Who, r0: Roulement, onSave: (Roulement) -> Uni
             val repos = (0..6).map { l.plusDays(it.toLong()) }.filter { apercu.etatAuto(it) == Etat.REPOS }
             Text(
                 "Sem. du ${l.dayOfMonth}/${l.monthValue} : " + repos.joinToString(", ") { JOURS_LONGS[it.dayOfWeek.value - 1] },
-                color = Color.White, fontSize = 14.sp, modifier = Modifier.padding(vertical = 2.dp),
+                color = Encre, fontSize = 14.sp, modifier = Modifier.padding(vertical = 2.dp),
             )
         }
 
@@ -197,12 +197,12 @@ fun CompteursScreen(state: AgendaState, onBack: () -> Unit) {
     Column(Modifier.fillMaxSize().safeDrawingPadding()) {
         TopBar("Compteurs", onBack)
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { annee-- }) { Icon(Icons.Filled.KeyboardArrowLeft, "Année précédente", tint = Color.White) }
+            IconButton(onClick = { annee-- }) { Icon(Icons.Filled.KeyboardArrowLeft, "Année précédente", tint = Encre) }
             Text(
-                "$annee", color = Color.White, fontWeight = FontWeight.Black, fontSize = 20.sp,
+                "$annee", color = Encre, fontWeight = FontWeight.Black, fontSize = 20.sp,
                 textAlign = TextAlign.Center, modifier = Modifier.weight(1f),
             )
-            IconButton(onClick = { annee++ }) { Icon(Icons.Filled.KeyboardArrowRight, "Année suivante", tint = Color.White) }
+            IconButton(onClick = { annee++ }) { Icon(Icons.Filled.KeyboardArrowRight, "Année suivante", tint = Encre) }
         }
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
             Who.entries.forEach { w ->
@@ -212,15 +212,15 @@ fun CompteursScreen(state: AgendaState, onBack: () -> Unit) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Avatar(w, 28)
                         Spacer(Modifier.width(10.dp))
-                        Text(w.label, color = Color.White, fontWeight = FontWeight.Black, fontSize = 17.sp)
+                        Text(w.label, color = Encre, fontWeight = FontWeight.Black, fontSize = 17.sp)
                     }
                     Spacer(Modifier.height(10.dp))
                     Ligne("Congés posés", "${c.conges} / $quota", Yellow)
                     Ligne("Congés restants", "${quota - c.conges}", Yellow)
                     Ligne("Récups", "${c.recups}", Blue)
                     Ligne("Fracs", "${c.fracs}", Purple)
-                    Ligne("Heures sup", "${c.heuresSup}", Color.White)
-                    Ligne("Remplacements", "${c.remplacements.size}", Color.White)
+                    Ligne("Heures sup", "${c.heuresSup}", Encre)
+                    Ligne("Remplacements", "${c.remplacements.size}", Encre)
                     c.remplacements.forEach { (d, p) ->
                         Text("· ${fmtCourt(d)} : $p", color = Muted, fontSize = 13.sp, modifier = Modifier.padding(start = 8.dp, top = 2.dp))
                     }
@@ -241,6 +241,7 @@ private fun Ligne(label: String, valeur: String, color: Color) = Row(
 
 /* ---------- Réglages ---------- */
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ReglagesScreen(
     moi: Who,
@@ -264,7 +265,7 @@ fun ReglagesScreen(
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
             Section("Application")
             Carte {
-                Ligne("Version", BuildConfig.VERSION_NAME, Color.White)
+                Ligne("Version", BuildConfig.VERSION_NAME, Encre)
                 Spacer(Modifier.height(10.dp))
                 Button(
                     onClick = {
@@ -285,7 +286,7 @@ fun ReglagesScreen(
             Section("Enfants")
             Carte {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Une semaine sur deux", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.weight(1f))
+                    Text("Une semaine sur deux", color = Encre, fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.weight(1f))
                     androidx.compose.material3.Switch(checked = enfants.actif, onCheckedChange = { onEnfants(enfants.copy(actif = it)) })
                 }
                 if (enfants.actif) {
@@ -305,13 +306,13 @@ fun ReglagesScreen(
             Theme.CHOIX.forEach { (cle, nom, options) ->
                 val actuelle = Theme.valeur(cle)
                 Carte(Modifier.padding(bottom = 8.dp)) {
-                    Text(nom, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                    Text(nom, color = Encre, fontWeight = FontWeight.Bold, fontSize = 15.sp)
                     Spacer(Modifier.height(8.dp))
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         options.forEach { c ->
                             Box(
                                 Modifier.size(28.dp).clip(CircleShape).background(Color(c))
-                                    .border(if (c == actuelle) 3.dp else 1.dp, if (c == actuelle) Color.White else Muted.copy(alpha = 0.3f), CircleShape)
+                                    .border(if (c == actuelle) 3.dp else 1.dp, if (c == actuelle) Encre else Muted.copy(alpha = 0.3f), CircleShape)
                                     .clickable { Theme.changer(ctx, cle, c) },
                             )
                         }
@@ -331,7 +332,7 @@ private fun LienReglage(titre: String, onClick: () -> Unit) = Column(
     Modifier.fillMaxWidth().padding(bottom = 8.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(14.dp))
         .background(Navy2).clickable { onClick() }.padding(14.dp),
 ) {
-    Text(titre, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+    Text(titre, color = Encre, fontWeight = FontWeight.Bold, fontSize = 16.sp)
 }
 
 @Composable
@@ -341,14 +342,14 @@ private fun ChoixCouleur(w: Who, onCouleur: (Who, Long) -> Unit) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Avatar(w, 26)
             Spacer(Modifier.width(10.dp))
-            Text(w.label, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text(w.label, color = Encre, fontWeight = FontWeight.Bold, fontSize = 16.sp)
         }
         Spacer(Modifier.height(10.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             PALETTE.forEach { c ->
                 Box(
                     Modifier.size(26.dp).clip(CircleShape).background(Color(c))
-                        .then(if (c == actuelle) Modifier.border(3.dp, Color.White, CircleShape) else Modifier)
+                        .then(if (c == actuelle) Modifier.border(3.dp, Encre, CircleShape) else Modifier)
                         .clickable { onCouleur(w, c) },
                 )
             }
@@ -368,7 +369,7 @@ private fun Presets(ctx: android.content.Context) = FlowRow(
         Row(
             Modifier.clip(androidx.compose.foundation.shape.RoundedCornerShape(14.dp))
                 .background(Color(m.getValue("fond")))
-                .border(if (actif) 2.dp else 1.dp, if (actif) Color.White else Color(m.getValue("cases")), androidx.compose.foundation.shape.RoundedCornerShape(14.dp))
+                .border(if (actif) 2.dp else 1.dp, if (actif) Encre else Color(m.getValue("cases")), androidx.compose.foundation.shape.RoundedCornerShape(14.dp))
                 .clickable { Theme.preset(ctx, m) }
                 .padding(horizontal = 10.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -377,7 +378,7 @@ private fun Presets(ctx: android.content.Context) = FlowRow(
                 Box(Modifier.padding(end = 3.dp).size(12.dp).clip(CircleShape).background(Color(m.getValue(k))))
             }
             Spacer(Modifier.width(4.dp))
-            Text(nom, color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            Text(nom, color = Encre, fontSize = 13.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
