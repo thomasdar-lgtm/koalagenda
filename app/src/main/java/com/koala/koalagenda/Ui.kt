@@ -97,6 +97,18 @@ object Theme {
             "Volcan" to mapOf("fond" to 0xFF120404, "cases" to 0xFF2E0E08, "accent" to 0xFFFF5722, "enfants" to 0xFF3D2A14, "ferie" to 0xFFFFCC00, "remplacement" to 0xFF3D8BFF),
             "Glacier" to mapOf("fond" to 0xFF061418, "cases" to 0xFF12303A, "accent" to 0xFF7FFFD4, "enfants" to 0xFF14385E, "ferie" to 0xFFFF9F43, "remplacement" to 0xFF9FD8FF),
             "Bonbon" to mapOf("fond" to 0xFF1A0614, "cases" to 0xFF3A1230, "accent" to 0xFFFFB3DE, "enfants" to 0xFF14385E, "ferie" to 0xFFFFCC00, "remplacement" to 0xFF9FD8FF),
+            "Ardoise" to mapOf("fond" to 0xFF2E3440, "cases" to 0xFF3B4252, "accent" to 0xFF88C0D0, "enfants" to 0xFF4C566A, "ferie" to 0xFFD08770, "remplacement" to 0xFF81A1C1),
+            "Brume" to mapOf("fond" to 0xFF4A5363, "cases" to 0xFF5A6476, "accent" to 0xFFFFD580, "enfants" to 0xFF3E6A6E, "ferie" to 0xFFFF9F43, "remplacement" to 0xFF9FD8FF),
+            "Terracotta" to mapOf("fond" to 0xFF4E3029, "cases" to 0xFF623D34, "accent" to 0xFFFFB38A, "enfants" to 0xFF3C5A50, "ferie" to 0xFFFFD580, "remplacement" to 0xFF9FD8FF),
+            "Olive" to mapOf("fond" to 0xFF3A4130, "cases" to 0xFF4A533D, "accent" to 0xFFE6D27A, "enfants" to 0xFF5A4636, "ferie" to 0xFFFF9F43, "remplacement" to 0xFF9FD8FF),
+            "Bleu acier" to mapOf("fond" to 0xFF2A3F54, "cases" to 0xFF375068, "accent" to 0xFFFFC857, "enfants" to 0xFF2E5E5A, "ferie" to 0xFFFF8A65, "remplacement" to 0xFFB5E2FF),
+            "Aubergine" to mapOf("fond" to 0xFF3D2A45, "cases" to 0xFF4D3657, "accent" to 0xFFFFB3DE, "enfants" to 0xFF2E5266, "ferie" to 0xFFFFD580, "remplacement" to 0xFF9FD8FF),
+            "Pétrole" to mapOf("fond" to 0xFF1E4048, "cases" to 0xFF285159, "accent" to 0xFFFFD166, "enfants" to 0xFF4A3F5C, "ferie" to 0xFFFF8A65, "remplacement" to 0xFFB5E2FF),
+            "Taupe" to mapOf("fond" to 0xFF4A423B, "cases" to 0xFF5A5149, "accent" to 0xFFF2C57C, "enfants" to 0xFF3E5A55, "ferie" to 0xFFFF8A65, "remplacement" to 0xFF9FD8FF),
+            "Sauge" to mapOf("fond" to 0xFF9AAE9C, "cases" to 0xFFAFC0B0, "accent" to 0xFFE8B84A, "enfants" to 0xFFC4B48F, "ferie" to 0xFFC2410C, "remplacement" to 0xFF2F6FED),
+            "Pierre" to mapOf("fond" to 0xFFA7A199, "cases" to 0xFFBAB4AC, "accent" to 0xFFE09A3E, "enfants" to 0xFF98B2B0, "ferie" to 0xFFB91C1C, "remplacement" to 0xFF2F6FED),
+            "Lagon" to mapOf("fond" to 0xFF8DB0C2, "cases" to 0xFFA3C1D0, "accent" to 0xFFFFC857, "enfants" to 0xFFC9B48A, "ferie" to 0xFFC2410C, "remplacement" to 0xFF5B3FD9),
+            "Vieux rose" to mapOf("fond" to 0xFFC29EA6, "cases" to 0xFFD0B1B8, "accent" to 0xFFE8B84A, "enfants" to 0xFFA3B8C9, "ferie" to 0xFFB91C1C, "remplacement" to 0xFF2F6FED),
             "Jour" to mapOf("fond" to 0xFFD9DEE7, "cases" to 0xFFE8EBF1, "accent" to 0xFFE0A100, "enfants" to 0xFFC6DDE0, "ferie" to 0xFFD9480F, "remplacement" to 0xFF2F6FED),
             "Lin" to mapOf("fond" to 0xFFE2DBCF, "cases" to 0xFFEEE8DE, "accent" to 0xFFC98A2E, "enfants" to 0xFFD3DEC6, "ferie" to 0xFFC2410C, "remplacement" to 0xFF3D7BD9),
             "Rosée" to mapOf("fond" to 0xFFE7D9DF, "cases" to 0xFFF1E7EB, "accent" to 0xFFD9658B, "enfants" to 0xFFD3DEEA, "ferie" to 0xFFE07800, "remplacement" to 0xFF4263EB),
@@ -111,10 +123,10 @@ object Theme {
     /** Choix proposés pour chaque couleur. */
     val CHOIX: List<Triple<String, String, List<Long>>>
         get() = listOf(
-            Triple("fond", "Fond", listOf(0xFFD9DEE7, 0xFFE2DBCF, 0xFFE7D9DF, 0xFFD5E3DC, 0xFF00071A, 0xFF0B0B0F, 0xFF06120C, 0xFF12061A, 0xFF101820, 0xFF1B1206, 0xFF06161F, 0xFF15151A)),
-            Triple("cases", "Cases", listOf(0xFFE8EBF1, 0xFFEEE8DE, 0xFFF1E7EB, 0xFF0D1733, 0xFF1E1E26, 0xFF12291C, 0xFF2A1430, 0xFF1C2833, 0xFF2A1F10, 0xFF0D2A38, 0xFF2B2B33)),
+            Triple("fond", "Fond", listOf(0xFF2E3440, 0xFF4A5363, 0xFF4E3029, 0xFF2A3F54, 0xFF9AAE9C, 0xFF8DB0C2, 0xFFD9DEE7, 0xFFE2DBCF, 0xFFE7D9DF, 0xFFD5E3DC, 0xFF00071A, 0xFF0B0B0F, 0xFF06120C, 0xFF12061A, 0xFF101820, 0xFF1B1206, 0xFF06161F, 0xFF15151A)),
+            Triple("cases", "Cases", listOf(0xFF3B4252, 0xFF5A6476, 0xFF623D34, 0xFF375068, 0xFFAFC0B0, 0xFFA3C1D0, 0xFFE8EBF1, 0xFFEEE8DE, 0xFFF1E7EB, 0xFF0D1733, 0xFF1E1E26, 0xFF12291C, 0xFF2A1430, 0xFF1C2833, 0xFF2A1F10, 0xFF0D2A38, 0xFF2B2B33)),
             Triple("accent", "Accent", listOf(0xFFFFCC00, 0xFFFF9F43, 0xFFFF6B6B, 0xFFFF7EB6, 0xFFB57BFF, 0xFF5AA9FF, 0xFF2ED3C6, 0xFFC6E06B)),
-            Triple("enfants", "Semaine enfants", listOf(0xFFC6DDE0, 0xFFD3DEC6, 0xFFECE0C2, 0xFFD3DEEA, 0xFF123B45, 0xFF1E4D2B, 0xFF4A2350, 0xFF3A3A12, 0xFF14385E, 0xFF4D2A14, 0xFF0F4F4F, 0xFF3D1F1F)),
+            Triple("enfants", "Semaine enfants", listOf(0xFF4C566A, 0xFF3E6A6E, 0xFF3C5A50, 0xFF2E5E5A, 0xFFC4B48F, 0xFF98B2B0, 0xFFC6DDE0, 0xFFD3DEC6, 0xFFECE0C2, 0xFFD3DEEA, 0xFF123B45, 0xFF1E4D2B, 0xFF4A2350, 0xFF3A3A12, 0xFF14385E, 0xFF4D2A14, 0xFF0F4F4F, 0xFF3D1F1F)),
             Triple("ferie", "Férié", listOf(0xFFFF9F43, 0xFFFF6B6B, 0xFFFFCC00, 0xFFB57BFF, 0xFF2ED3C6, 0xFFFF7EB6, 0xFFC6E06B, 0xFF5AA9FF)),
             Triple("remplacement", "Ordo", listOf(0xFF3D8BFF, 0xFF2ED3C6, 0xFFB57BFF, 0xFFFF9F43, 0xFFFF6B6B, 0xFFC6E06B, 0xFFFF7EB6, 0xFFE0E6F5)),
         )
@@ -148,7 +160,7 @@ object Theme {
 }
 
 /** Thème clair : fond lumineux, texte foncé. */
-val Clair: Boolean get() = Theme.fond.luminance() > 0.4f
+val Clair: Boolean get() = Theme.fond.luminance() > 0.25f
 /** Texte principal (blanc sur thème sombre, foncé sur thème clair). */
 val Encre: Color get() = if (Clair) Color(0xFF262B38) else Color.White
 /** Texte posé sur une couleur vive (pastilles, carrés, boutons) : toujours foncé. */

@@ -303,21 +303,34 @@ fun ReglagesScreen(
             Section("Thème")
             Presets(ctx)
             Spacer(Modifier.height(10.dp))
+            var nuancier by remember { mutableStateOf<String?>(null) }
             Theme.CHOIX.forEach { (cle, nom, options) ->
                 val actuelle = Theme.valeur(cle)
                 Carte(Modifier.padding(bottom = 8.dp)) {
                     Text(nom, color = Encre, fontWeight = FontWeight.Bold, fontSize = 15.sp)
                     Spacer(Modifier.height(8.dp))
                     FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        options.forEach { c ->
+                        val liste = if (actuelle in options) options else listOf(actuelle) + options
+                        liste.forEach { c ->
                             Box(
                                 Modifier.size(28.dp).clip(CircleShape).background(Color(c))
                                     .border(if (c == actuelle) 3.dp else 1.dp, if (c == actuelle) Encre else Muted.copy(alpha = 0.3f), CircleShape)
                                     .clickable { Theme.changer(ctx, cle, c) },
                             )
                         }
+                        Box(
+                            Modifier.size(28.dp).clip(CircleShape)
+                                .background(androidx.compose.ui.graphics.Brush.sweepGradient(
+                                    listOf(Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta, Color.Red)
+                                ))
+                                .clickable { nuancier = cle },
+                            contentAlignment = Alignment.Center,
+                        ) { Text("+", color = Color.White, fontWeight = FontWeight.Black, fontSize = 16.sp) }
                     }
                 }
+            }
+            nuancier?.let { cle ->
+                Nuancier(Theme.valeur(cle), onOk = { Theme.changer(ctx, cle, it); nuancier = null }, onDismiss = { nuancier = null })
             }
             Section("Ce téléphone")
             LienReglage("Je suis ${moi.label} · changer", onChangeMoi)
@@ -381,4 +394,41 @@ private fun Presets(ctx: android.content.Context) = FlowRow(
             Text(nom, color = Encre, fontSize = 13.sp, fontWeight = FontWeight.Bold)
         }
     }
+}
+
+/** Choix libre d'une couleur : teinte, saturation, luminosité. */
+@Composable
+private fun Nuancier(initial: Long, onOk: (Long) -> Unit, onDismiss: () -> Unit) {
+    val hsv = remember { FloatArray(3).also { android.graphics.Color.colorToHSV(initial.toInt(), it) } }
+    var h by remember { androidx.compose.runtime.mutableFloatStateOf(hsv[0]) }
+    var sa by remember { androidx.compose.runtime.mutableFloatStateOf(hsv[1]) }
+    var v by remember { androidx.compose.runtime.mutableFloatStateOf(hsv[2]) }
+    val c = Color.hsv(h, sa, v)
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            androidx.compose.material3.TextButton(onClick = {
+                onOk(android.graphics.Color.HSVToColor(floatArrayOf(h, sa, v)).toLong() and 0xFFFFFFFFL)
+            }) { Text("OK") }
+        },
+        dismissButton = { androidx.compose.material3.TextButton(onClick = onDismiss) { Text("Annuler") } },
+        text = {
+            Column {
+                Box(Modifier.fillMaxWidth().height(56.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(14.dp)).background(c))
+                Spacer(Modifier.height(12.dp))
+                Text("Teinte", color = Muted, fontSize = 12.sp)
+                Box(
+                    Modifier.fillMaxWidth().height(10.dp).clip(androidx.compose.foundation.shape.RoundedCornerShape(5.dp))
+                        .background(androidx.compose.ui.graphics.Brush.horizontalGradient(
+                            (0..6).map { Color.hsv(it * 60f % 360f, 1f, 1f) }
+                        )),
+                )
+                androidx.compose.material3.Slider(h, { h = it }, valueRange = 0f..359f)
+                Text("Saturation", color = Muted, fontSize = 12.sp)
+                androidx.compose.material3.Slider(sa, { sa = it })
+                Text("Luminosité", color = Muted, fontSize = 12.sp)
+                androidx.compose.material3.Slider(v, { v = it })
+            }
+        },
+    )
 }
