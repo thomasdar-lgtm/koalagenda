@@ -1,0 +1,5 @@
+w: file:///home/runner/work/koalagenda/koalagenda/app/src/main/java/com/koala/koalagenda/Settings.kt:200:67 'val Icons.Filled.KeyboardArrowLeft: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.KeyboardArrowLeft.
+w: file:///home/runner/work/koalagenda/koalagenda/app/src/main/java/com/koala/koalagenda/Settings.kt:205:67 'val Icons.Filled.KeyboardArrowRight: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.KeyboardArrowRight.
+w: file:///home/runner/work/koalagenda/koalagenda/app/src/main/java/com/koala/koalagenda/Settings.kt:200:67 'val Icons.Filled.KeyboardArrowLeft: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.KeyboardArrowLeft.
+w: file:///home/runner/work/koalagenda/koalagenda/app/src/main/java/com/koala/koalagenda/Settings.kt:205:67 'val Icons.Filled.KeyboardArrowRight: ImageVector' is deprecated. Use the AutoMirrored version at Icons.AutoMirrored.Filled.KeyboardArrowRight.
+BUILD SUCCESSFUL in 1m 37s

@@ -1,0 +1,13 @@
+<testsuite name="com.koala.koalagenda.ModelTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-11-18T09:47:45.062Z" hostname="runnervmccnms" time="0.106">
+<testcase name="echange"
+<testcase name="congesSurPeriode"
+<testcase name="modificationDuJour"
+<testcase name="roulementThomas"
+<testcase name="pasDeTableauDansUnTableau"
+<testcase name="enfantsUneSemaineSurDeux"
+<testcase name="rappel"
+<testcase name="selectionMultiple"
+<testcase name="joursFeries"
+<testcase name="semaineActuelle"
+<testcase name="allerRetourMap"
+<testcase name="roulementCindy"
