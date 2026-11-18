@@ -55,8 +55,8 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
-val FondEnfants = Color(0xFF123B45)
-val CouleurFerie = Color(0xFFFF9F43)
+val FondEnfants: Color get() = Theme.enfants
+val CouleurFerie: Color get() = Theme.ferie
 
 /** Texte sans marge interne : centré pour de vrai dans les petites cases. */
 val Serre = androidx.compose.ui.text.TextStyle(
@@ -68,7 +68,7 @@ val Serre = androidx.compose.ui.text.TextStyle(
 )
 
 /** Saisie sur plusieurs jours (Ordo ou congés), sur un ou plusieurs mois. */
-data class Selection(val ordo: Boolean, val etat: Etat, val avant: Set<LocalDate>, val jours: Set<LocalDate>)
+data class Selection(val ordo: Boolean, val etat: Etat, val avant: Set<LocalDate>, val jours: Set<LocalDate>, val echange: Boolean = false)
 
 @Composable
 fun MonthScreen(
@@ -88,7 +88,11 @@ fun MonthScreen(
     var menuPlus by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     androidx.activity.compose.BackHandler(enabled = selection != null) { onSelection(null) }
     val clicJour: (LocalDate) -> Unit = { d ->
-        if (selection != null) onSelection(selection.copy(jours = if (d in selection.jours) selection.jours - d else selection.jours + d))
+        if (selection != null) onSelection(selection.copy(jours = when {
+            d in selection.jours -> selection.jours - d
+            selection.echange && selection.jours.size >= 2 -> setOf(d)
+            else -> selection.jours + d
+        }))
         else onDay(d)
     }
     val today = LocalDate.now()
@@ -126,6 +130,10 @@ fun MonthScreen(
                             menuPlus = false
                             val a = joursEtat(state.jours, moi, Etat.CONGE)
                             onSelection(Selection(false, Etat.CONGE, a, a))
+                        })
+                        androidx.compose.material3.DropdownMenuItem(text = { Text("Échanger un repos") }, onClick = {
+                            menuPlus = false
+                            onSelection(Selection(false, Etat.REPOS, emptySet(), emptySet(), echange = true))
                         })
                     }
                 }
@@ -238,7 +246,7 @@ private fun Grille(
     }
 }
 
-val BleuRemplacement = Color(0xFF3D8BFF)
+val BleuRemplacement: Color get() = Theme.remplacement
 
 @Composable
 private fun Case(
@@ -333,7 +341,7 @@ private fun BarreSelection(
     Modifier.fillMaxWidth().clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)).background(Navy3)
         .padding(horizontal = 16.dp, vertical = 12.dp),
 ) {
-    if (!sel.ordo) {
+    if (!sel.ordo && !sel.echange) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             listOf(Etat.CONGE, Etat.RECUP, Etat.FRAC).forEach { e ->
                 Choix(e.label, sel.etat == e, whoColor(moi)) {
@@ -346,11 +354,11 @@ private fun BarreSelection(
     }
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
-            "${if (sel.ordo) "Ordo" else sel.etat.label} · ${sel.jours.size} j",
+            if (sel.echange) "Échange · ${sel.jours.size}/2" else "${if (sel.ordo) "Ordo" else sel.etat.label} · ${sel.jours.size} j",
             color = Color.White, fontWeight = FontWeight.Black, fontSize = 17.sp, modifier = Modifier.weight(1f),
         )
         androidx.compose.material3.TextButton(onClick = { onSelection(null) }) { Text("Annuler", color = Muted) }
-        androidx.compose.material3.Button(onClick = { onValider(sel) }) { Text("Valider", fontWeight = FontWeight.Bold) }
+        androidx.compose.material3.Button(onClick = { onValider(sel) }, enabled = !sel.echange || sel.jours.size == 2) { Text("Valider", fontWeight = FontWeight.Bold) }
     }
 }
 

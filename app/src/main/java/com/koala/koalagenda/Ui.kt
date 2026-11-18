@@ -43,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -55,11 +56,73 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 
-val Navy = Color(0xFF00071A)
-val Navy2 = Color(0xFF0D1733)
-val Navy3 = Color(0xFF16213F)
-val Navy4 = Color(0xFF23305A)
-val Yellow = Color(0xFFFFCC00)
+/** Couleurs du thème, réglables (propres à chaque téléphone). */
+object Theme {
+    var fond by androidx.compose.runtime.mutableStateOf(Color(DEFAUT.getValue("fond")))
+    var cases by androidx.compose.runtime.mutableStateOf(Color(DEFAUT.getValue("cases")))
+    var accent by androidx.compose.runtime.mutableStateOf(Color(DEFAUT.getValue("accent")))
+    var enfants by androidx.compose.runtime.mutableStateOf(Color(DEFAUT.getValue("enfants")))
+    var ferie by androidx.compose.runtime.mutableStateOf(Color(DEFAUT.getValue("ferie")))
+    var remplacement by androidx.compose.runtime.mutableStateOf(Color(DEFAUT.getValue("remplacement")))
+
+    val DEFAUT: Map<String, Long>
+        get() = mapOf(
+            "fond" to 0xFF00071A, "cases" to 0xFF0D1733, "accent" to 0xFFFFCC00,
+            "enfants" to 0xFF123B45, "ferie" to 0xFFFF9F43, "remplacement" to 0xFF3D8BFF,
+        )
+
+    val PRESETS: List<Pair<String, Map<String, Long>>>
+        get() = listOf(
+            "Nuit" to DEFAUT,
+            "Forêt" to mapOf("fond" to 0xFF06120C, "cases" to 0xFF12291C, "accent" to 0xFFC6E06B, "enfants" to 0xFF3A3A12, "ferie" to 0xFFFF9F43, "remplacement" to 0xFF2ED3C6),
+            "Prune" to mapOf("fond" to 0xFF12061A, "cases" to 0xFF2A1430, "accent" to 0xFFFF7EB6, "enfants" to 0xFF14385E, "ferie" to 0xFFFFCC00, "remplacement" to 0xFF5AA9FF),
+            "Graphite" to mapOf("fond" to 0xFF0B0B0F, "cases" to 0xFF1E1E26, "accent" to 0xFF2ED3C6, "enfants" to 0xFF3D2A14, "ferie" to 0xFFFF6B6B, "remplacement" to 0xFFB57BFF),
+        )
+
+    /** Choix proposés pour chaque couleur. */
+    val CHOIX: List<Triple<String, String, List<Long>>>
+        get() = listOf(
+            Triple("fond", "Fond", listOf(0xFF00071A, 0xFF0B0B0F, 0xFF06120C, 0xFF12061A, 0xFF101820, 0xFF1B1206, 0xFF06161F, 0xFF15151A)),
+            Triple("cases", "Cases", listOf(0xFF0D1733, 0xFF1E1E26, 0xFF12291C, 0xFF2A1430, 0xFF1C2833, 0xFF2A1F10, 0xFF0D2A38, 0xFF2B2B33)),
+            Triple("accent", "Accent", listOf(0xFFFFCC00, 0xFFFF9F43, 0xFFFF6B6B, 0xFFFF7EB6, 0xFFB57BFF, 0xFF5AA9FF, 0xFF2ED3C6, 0xFFC6E06B)),
+            Triple("enfants", "Semaine enfants", listOf(0xFF123B45, 0xFF1E4D2B, 0xFF4A2350, 0xFF3A3A12, 0xFF14385E, 0xFF4D2A14, 0xFF0F4F4F, 0xFF3D1F1F)),
+            Triple("ferie", "Férié", listOf(0xFFFF9F43, 0xFFFF6B6B, 0xFFFFCC00, 0xFFB57BFF, 0xFF2ED3C6, 0xFFFF7EB6, 0xFFC6E06B, 0xFF5AA9FF)),
+            Triple("remplacement", "Ordo", listOf(0xFF3D8BFF, 0xFF2ED3C6, 0xFFB57BFF, 0xFFFF9F43, 0xFFFF6B6B, 0xFFC6E06B, 0xFFFF7EB6, 0xFFE0E6F5)),
+        )
+
+    fun valeur(cle: String): Long = when (cle) {
+        "fond" -> fond; "cases" -> cases; "accent" -> accent
+        "enfants" -> enfants; "ferie" -> ferie; else -> remplacement
+    }.toArgb().toLong() and 0xFFFFFFFFL
+
+    private fun appliquer(cle: String, v: Long) {
+        val c = Color(v)
+        when (cle) {
+            "fond" -> fond = c; "cases" -> cases = c; "accent" -> accent = c
+            "enfants" -> enfants = c; "ferie" -> ferie = c; "remplacement" -> remplacement = c
+        }
+    }
+
+    private fun prefs(ctx: android.content.Context) = ctx.getSharedPreferences("theme", android.content.Context.MODE_PRIVATE)
+
+    fun charger(ctx: android.content.Context) {
+        val p = prefs(ctx)
+        DEFAUT.forEach { (k, v) -> appliquer(k, p.getLong(k, v)) }
+    }
+
+    fun changer(ctx: android.content.Context, cle: String, v: Long) {
+        appliquer(cle, v)
+        prefs(ctx).edit().putLong(cle, v).apply()
+    }
+
+    fun preset(ctx: android.content.Context, m: Map<String, Long>) = m.forEach { (k, v) -> changer(ctx, k, v) }
+}
+
+val Navy: Color get() = Theme.fond
+val Navy2: Color get() = Theme.cases
+val Navy3: Color get() = androidx.compose.ui.graphics.lerp(Theme.cases, Color.White, 0.06f)
+val Navy4: Color get() = androidx.compose.ui.graphics.lerp(Theme.cases, Color.White, 0.14f)
+val Yellow: Color get() = Theme.accent
 val Blue = Color(0xFF5AA9FF)
 val Muted = Color(0xFFB7C0D8)
 val Green = Color(0xFF4CC38A)

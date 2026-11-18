@@ -299,6 +299,27 @@ fun ReglagesScreen(
             }
             Section("Couleurs")
             Who.entries.forEach { w -> ChoixCouleur(w, onCouleur) }
+            Section("Thème")
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Theme.PRESETS.forEach { (nom, m) -> Choix(nom, false, Muted) { Theme.preset(ctx, m) } }
+            }
+            Spacer(Modifier.height(10.dp))
+            Theme.CHOIX.forEach { (cle, nom, options) ->
+                val actuelle = Theme.valeur(cle)
+                Carte(Modifier.padding(bottom = 8.dp)) {
+                    Text(nom, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                    Spacer(Modifier.height(8.dp))
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        options.forEach { c ->
+                            Box(
+                                Modifier.size(28.dp).clip(CircleShape).background(Color(c))
+                                    .border(if (c == actuelle) 3.dp else 1.dp, if (c == actuelle) Color.White else Muted.copy(alpha = 0.3f), CircleShape)
+                                    .clickable { Theme.changer(ctx, cle, c) },
+                            )
+                        }
+                    }
+                }
+            }
             Section("Ce téléphone")
             LienReglage("Je suis ${moi.label} · changer", onChangeMoi)
             LienReglage("Se déconnecter", onSignOut)

@@ -119,6 +119,19 @@ class ModelTest {
         assertEquals(11, feries(2027).size)
     }
 
+    @Test fun echange() {
+        // Thomas : repos sam 21/11, il le déplace au mar 24/11
+        val l = echangerRepos(thomas, emptyMap(), Who.THOMAS, d("2026-11-21"), d("2026-11-24"), 1)!!
+        val m = l.associateBy { it.id }
+        assertEquals(Etat.TRAVAIL, jourVu(thomas, m[Jour.idDe(Who.THOMAS, d("2026-11-21"))], d("2026-11-21")).etat)
+        assertEquals(Etat.REPOS, jourVu(thomas, m[Jour.idDe(Who.THOMAS, d("2026-11-24"))], d("2026-11-24")).etat)
+        // Deux jours travaillés : rien à échanger
+        assertEquals(null, echangerRepos(thomas, emptyMap(), Who.THOMAS, d("2026-11-18"), d("2026-11-19"), 1))
+        // Ré-échanger revient au roulement
+        val retour = echangerRepos(thomas, m, Who.THOMAS, d("2026-11-24"), d("2026-11-21"), 2)!!
+        assertTrue(retour.all { it.etat == null })
+    }
+
     @Test fun rappel() {
         val e = Evenement(date = d("2026-12-02"), heure = "14:30", rappel = 60)
         val attendu = d("2026-12-02").atTime(13, 30).toInstant(ZoneOffset.UTC).toEpochMilli()

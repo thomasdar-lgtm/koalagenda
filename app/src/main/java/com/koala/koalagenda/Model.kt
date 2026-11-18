@@ -266,6 +266,23 @@ fun appliquerEtat(
     if (n == j) null else n.copy(majLe = maintenant)
 }
 
+/**
+ * Échange de repos entre deux jours : le jour de repos passe en travail, le jour travaillé passe en repos.
+ * null si les deux jours sont du même type (rien à échanger).
+ */
+fun echangerRepos(r: Roulement, jours: Map<String, Jour>, w: Who, a: LocalDate, b: LocalDate, maintenant: Long): List<Jour>? {
+    val ja = jours[Jour.idDe(w, a)] ?: Jour(w, a)
+    val jb = jours[Jour.idDe(w, b)] ?: Jour(w, b)
+    val offA = (ja.etat ?: r.etatAuto(a)).off
+    val offB = (jb.etat ?: r.etatAuto(b)).off
+    if (offA == offB) return null
+    fun vers(j: Jour, cible: Etat): Jour {
+        val etat = if (r.etatAuto(j.date) == cible) null else cible
+        return j.copy(etat = etat, remplacement = if (cible == Etat.TRAVAIL) j.remplacement else "", heureSup = if (cible == Etat.TRAVAIL) j.heureSup else false, majLe = maintenant)
+    }
+    return if (offA) listOf(vers(ja, Etat.TRAVAIL), vers(jb, Etat.REPOS)) else listOf(vers(ja, Etat.REPOS), vers(jb, Etat.TRAVAIL))
+}
+
 data class Compteur(
     val conges: Int = 0,
     val recups: Int = 0,

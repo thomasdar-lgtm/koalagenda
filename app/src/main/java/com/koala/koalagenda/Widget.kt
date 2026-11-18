@@ -117,6 +117,7 @@ object WidgetStore {
 
 class AgendaWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        Theme.charger(context)
         val data = WidgetStore.lire(context)
         provideContent { Contenu(data) }
     }

@@ -41,6 +41,7 @@ class MainActivity : ComponentActivity() {
             statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
         )
+        Theme.charger(this)
         val crash = java.io.File(filesDir, "crash.txt")
         val ancien = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { t, e ->
@@ -61,6 +62,7 @@ class MainActivity : ComponentActivity() {
             return
         }
         Rappels.canal(this)
+        Theme.charger(this)
         val repo = Repo.get(this)
         repo.listen()
         setContent {
@@ -117,11 +119,18 @@ fun App(repo: Repo) {
                 onSelection = { selection = it },
                 onValider = { sel ->
                     val now = System.currentTimeMillis()
-                    val l = if (sel.ordo) appliquerOrdo(state.roulement(m), state.jours, m, sel.avant, sel.jours, now)
-                    else appliquerEtat(state.jours, m, sel.etat, sel.avant, sel.jours, now)
-                    repo.saveJours(l)
-                    toast(ctx, "${l.size} jour(s) modifié(s)")
-                    selection = null
+                    if (sel.echange) {
+                        val (a, b) = sel.jours.sorted().let { it[0] to it[1] }
+                        val l = echangerRepos(state.roulement(m), state.jours, m, a, b, now)
+                        if (l == null) toast(ctx, "Choisis un jour de repos et un jour travaillé")
+                        else { repo.saveJours(l); toast(ctx, "Repos échangé"); selection = null }
+                    } else {
+                        val l = if (sel.ordo) appliquerOrdo(state.roulement(m), state.jours, m, sel.avant, sel.jours, now)
+                        else appliquerEtat(state.jours, m, sel.etat, sel.avant, sel.jours, now)
+                        repo.saveJours(l)
+                        toast(ctx, "${l.size} jour(s) modifié(s)")
+                        selection = null
+                    }
                 },
             )
 
