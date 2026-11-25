@@ -120,25 +120,21 @@ fun MonthScreen(
                         Modifier.padding(start = 8.dp).size(36.dp).clip(CircleShape).background(Yellow).clickable { menuPlus = true },
                         contentAlignment = Alignment.Center,
                     ) { Icon(Icons.Filled.Add, "Ajouter", tint = Sombre) }
-                    androidx.compose.material3.DropdownMenu(expanded = menuPlus, onDismissRequest = { menuPlus = false }) {
-                        androidx.compose.material3.DropdownMenuItem(text = { Text("Rdv") }, onClick = { menuPlus = false; onNewEvent() })
-                        androidx.compose.material3.DropdownMenuItem(text = { Text("Anniversaire") }, onClick = { menuPlus = false; onNewAnniv() })
-                        androidx.compose.material3.DropdownMenuItem(text = { Text("Ordo") }, onClick = {
-                            menuPlus = false
-                            val a = joursOrdo(state.jours, moi)
-                            onSelection(Selection(true, Etat.TRAVAIL, a, a))
-                        })
-                        androidx.compose.material3.DropdownMenuItem(text = { Text("Congés") }, onClick = {
-                            menuPlus = false
-                            val a = joursEtat(state.jours, moi, Etat.CONGE)
-                            onSelection(Selection(false, Etat.CONGE, a, a))
-                        })
-                        androidx.compose.material3.DropdownMenuItem(text = { Text("Échanger un repos") }, onClick = {
-                            menuPlus = false
-                            onSelection(Selection(false, Etat.REPOS, emptySet(), emptySet(), echange = true))
-                        })
-                    }
                 }
+                if (menuPlus) MenuAjout(
+                    couleurMoi = whoColor(moi),
+                    onDismiss = { menuPlus = false },
+                    onChoix = { choix ->
+                        menuPlus = false
+                        when (choix) {
+                            0 -> onNewEvent()
+                            1 -> onNewAnniv()
+                            2 -> joursOrdo(state.jours, moi).let { onSelection(Selection(true, Etat.TRAVAIL, it, it)) }
+                            3 -> joursEtat(state.jours, moi, Etat.CONGE).let { onSelection(Selection(false, Etat.CONGE, it, it)) }
+                            4 -> onSelection(Selection(false, Etat.REPOS, emptySet(), emptySet(), echange = true))
+                        }
+                    },
+                )
                 Box(
                     Modifier.padding(start = 6.dp).size(40.dp).clip(CircleShape).clickable { onReglages() },
                     contentAlignment = Alignment.Center,
@@ -395,5 +391,71 @@ fun LigneEvenement(e: Evenement, showDate: Boolean, onClick: () -> Unit) = Row(
             },
             color = Muted, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
         )
+    }
+}
+
+/** Feuille « Ajouter » : grandes tuiles colorées. */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun MenuAjout(couleurMoi: Color, onDismiss: () -> Unit, onChoix: (Int) -> Unit) {
+    val etat = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    androidx.compose.material3.ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = etat,
+        containerColor = Navy2,
+        dragHandle = {
+            Box(Modifier.padding(top = 10.dp, bottom = 6.dp).size(width = 40.dp, height = 4.dp).clip(CircleShape).background(Muted.copy(alpha = 0.5f)))
+        },
+    ) {
+        Column(Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 28.dp)) {
+            Text(
+                "Ajouter", color = Encre, fontWeight = FontWeight.Black, fontSize = 22.sp,
+                modifier = Modifier.padding(start = 4.dp, bottom = 14.dp),
+            )
+            val tuiles = listOf(
+                Triple("📅", "Rdv", Yellow),
+                Triple("🎂", "Anniversaire", CouleurAnniv),
+                Triple("⇄", "Ordo", BleuRemplacement),
+                Triple("🌴", "Congés", couleurMoi),
+                Triple("🔁", "Échanger\nun repos", couleurMoi),
+            )
+            // Rdv en grand, puis deux lignes de deux
+            Tuile(tuiles[0], Modifier.fillMaxWidth().height(78.dp), large = true) { onChoix(0) }
+            Spacer(Modifier.height(10.dp))
+            for (ligne in listOf(listOf(1, 2), listOf(3, 4))) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    ligne.forEach { i -> Tuile(tuiles[i], Modifier.weight(1f).height(104.dp), large = false) { onChoix(i) } }
+                }
+                Spacer(Modifier.height(10.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun Tuile(t: Triple<String, String, Color>, modifier: Modifier, large: Boolean, onClick: () -> Unit) {
+    val (icone, titre, couleur) = t
+    val forme = RoundedCornerShape(20.dp)
+    val contenu: @Composable () -> Unit = {
+        Box(
+            Modifier.size(if (large) 46.dp else 42.dp).clip(RoundedCornerShape(14.dp)).background(couleur),
+            contentAlignment = Alignment.Center,
+        ) { Text(icone, fontSize = 22.sp, color = Sombre, fontWeight = FontWeight.Black, style = Serre) }
+    }
+    if (large) Row(
+        modifier.clip(forme).background(Brush.horizontalGradient(listOf(couleur.copy(alpha = 0.28f), Navy3)))
+            .border(1.dp, couleur.copy(alpha = 0.45f), forme).clickable { onClick() }.padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        contenu()
+        Spacer(Modifier.width(14.dp))
+        Text(titre, color = Encre, fontWeight = FontWeight.Black, fontSize = 18.sp)
+    } else Column(
+        modifier.clip(forme).background(Brush.verticalGradient(listOf(couleur.copy(alpha = 0.22f), Navy3)))
+            .border(1.dp, couleur.copy(alpha = 0.4f), forme).clickable { onClick() }.padding(14.dp),
+        verticalArrangement = Arrangement.SpaceBetween,
+    ) {
+        contenu()
+        Text(titre, color = Encre, fontWeight = FontWeight.Bold, fontSize = 15.sp, lineHeight = 17.sp)
     }
 }
