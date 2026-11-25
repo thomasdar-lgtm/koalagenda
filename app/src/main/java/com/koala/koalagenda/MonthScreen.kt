@@ -81,6 +81,7 @@ fun MonthScreen(
     onEvent: (Evenement) -> Unit,
     onNewEvent: () -> Unit,
     onReglages: () -> Unit,
+    onNewAnniv: () -> Unit,
     selection: Selection?,
     onSelection: (Selection?) -> Unit,
     onValider: (Selection) -> Unit,
@@ -121,6 +122,7 @@ fun MonthScreen(
                     ) { Icon(Icons.Filled.Add, "Ajouter", tint = Sombre) }
                     androidx.compose.material3.DropdownMenu(expanded = menuPlus, onDismissRequest = { menuPlus = false }) {
                         androidx.compose.material3.DropdownMenuItem(text = { Text("Rdv") }, onClick = { menuPlus = false; onNewEvent() })
+                        androidx.compose.material3.DropdownMenuItem(text = { Text("Anniversaire") }, onClick = { menuPlus = false; onNewAnniv() })
                         androidx.compose.material3.DropdownMenuItem(text = { Text("Ordo") }, onClick = {
                             menuPlus = false
                             val a = joursOrdo(state.jours, moi)
@@ -288,11 +290,13 @@ private fun Case(
                 Who.entries.forEach { w -> Emplacement(state.vu(w, d), whoColor(w), slot) }
             }
             // Rdv et évènements, une ligne chacun
-            if (lignes > 0 && evts.isNotEmpty()) {
+            val barres = anniversairesDu(state.anniversaires, d).map { "🎂 ${it.nom}" to CouleurAnniv } +
+                evts.map { e -> e.titre.ifBlank { "Rdv" } to pourColor(e.pour) }
+            if (lignes > 0 && barres.isNotEmpty()) {
                 Spacer(Modifier.height(gap))
-                val montres = if (evts.size > lignes) evts.take(lignes - 1) else evts
-                montres.forEach { e -> Barre(e.titre.ifBlank { "Rdv" }, pourColor(e.pour), barre) }
-                if (evts.size > lignes) Barre("+${evts.size - montres.size}", Muted, barre)
+                val montres = if (barres.size > lignes) barres.take(lignes - 1) else barres
+                montres.forEach { (t, c) -> Barre(t, c, barre) }
+                if (barres.size > lignes) Barre("+${barres.size - montres.size}", Muted, barre)
             }
         }
     }

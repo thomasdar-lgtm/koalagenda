@@ -55,6 +55,7 @@ fun DayScreen(
     onEvent: (Evenement) -> Unit,
     onNewEvent: () -> Unit,
     onPeriode: () -> Unit,
+    onAnniv: (Anniversaire) -> Unit,
 ) {
     // Copies locales, enregistrées en quittant l'écran
     var jt by remember(date) { mutableStateOf(state.jour(Who.THOMAS, date) ?: Jour(Who.THOMAS, date)) }
@@ -86,6 +87,9 @@ fun DayScreen(
                 Spacer(Modifier.height(8.dp))
             }
 
+            val annivs = anniversairesDu(state.anniversaires, date)
+            if (annivs.isNotEmpty()) Section("Anniversaires")
+            annivs.forEach { a -> LigneAnniversaire(a, date, montrerDate = false) { sauver(repo, jt, jc, init); onAnniv(a) } }
             val evts = state.evenements.filter { it.date == date && it.visiblePar(moi) }
             if (evts.isNotEmpty()) Section("Rdv")
             evts.forEach { e -> LigneEvenement(e, showDate = false) { sauver(repo, jt, jc, init); onEvent(e) } }

@@ -132,6 +132,21 @@ class ModelTest {
         assertTrue(retour.all { it.etat == null })
     }
 
+    @Test fun anniversaires() {
+        val a = Anniversaire("1", "Léa", 3, 12, 1990)
+        assertEquals(d("2027-03-12"), a.dateEn(2027))
+        assertEquals(37, a.age(2027))
+        assertEquals(null, a.copy(annee = 0).age(2027))
+        assertEquals(d("2027-03-12"), a.prochain(d("2026-11-25")))
+        assertEquals(d("2027-03-12"), a.prochain(d("2027-03-12")))
+        val b = Anniversaire("2", "Bissextile", 2, 29)
+        assertEquals(d("2027-02-28"), b.dateEn(2027))
+        assertEquals(d("2028-02-29"), b.dateEn(2028))
+        assertTrue(Anniversaire.valide(29, 2) && !Anniversaire.valide(31, 4))
+        assertEquals(listOf(a), anniversairesDu(listOf(a, b), d("2026-03-12")))
+        assertEquals(a, Anniversaire.fromMap("1", a.toMap()))
+    }
+
     @Test fun rappel() {
         val e = Evenement(date = d("2026-12-02"), heure = "14:30", rappel = 60)
         val attendu = d("2026-12-02").atTime(13, 30).toInstant(ZoneOffset.UTC).toEpochMilli()

@@ -68,7 +68,7 @@ object Rappels {
         }
     }
 
-    fun planifier(ctx: Context, evenements: List<Evenement>, moi: Who) {
+    fun planifier(ctx: Context, evenements: List<Evenement>, anniversaires: List<Anniversaire>, moi: Who) {
         val am = ctx.getSystemService(AlarmManager::class.java) ?: return
         val now = System.currentTimeMillis()
         val nouveaux = evenements
@@ -81,6 +81,16 @@ object Rappels {
                     if (!e.journee) append(" à ${e.heure.replace(":", "h")}")
                 }
                 Item("${e.id}_${e.majLe}", at, e.titre.ifBlank { "Rdv" }, quand)
+            } + anniversaires.mapNotNull { a ->
+                // Le jour même à 8h
+                val jour = a.prochain(java.time.LocalDate.now())
+                val at = jour.atTime(8, 0).atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+                if (at <= now || at > now + HORIZON) return@mapNotNull null
+                val age = a.age(jour.year)
+                Item(
+                    "anniv_${a.id}_${jour}_${a.nom.hashCode()}", at, "🎂 Anniversaire de ${a.nom}",
+                    if (age != null) "$age ans aujourd'hui" else "C'est aujourd'hui !",
+                )
             }
         val anciens = lire(ctx)
         val garder = nouveaux.map { it.id }.toSet()

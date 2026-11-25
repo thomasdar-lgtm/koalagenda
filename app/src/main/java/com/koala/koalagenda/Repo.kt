@@ -28,6 +28,7 @@ data class AgendaState(
     val evenements: List<Evenement> = emptyList(),
     val couleurs: Map<Who, Long> = COULEURS_DEFAUT,
     val enfants: Enfants = Enfants(),
+    val anniversaires: List<Anniversaire> = emptyList(),
     val pending: Boolean = false,
     val error: String? = null,
 ) {
@@ -98,7 +99,7 @@ class Repo private constructor(private val ctx: Context) {
         charge += nom
         val s = f(_state.value)
         _state.value = s.copy(
-            loaded = charge.size >= 5,
+            loaded = charge.size >= 6,
             pending = pend.values.any { it },
             error = err,
         )
@@ -131,10 +132,26 @@ class Repo private constructor(private val ctx: Context) {
             if (snap == null) return@addSnapshotListener
             val l = snap.documents.mapNotNull { Evenement.fromMap(it.id, it.data ?: emptyMap()) }
             maj("e", snap.metadata.hasPendingWrites(), null) { it.copy(evenements = trierEvenements(l)) }
-            moi?.let { Rappels.planifier(ctx, l, it) }
+            moi?.let { Rappels.planifier(ctx, l, _state.value.anniversaires, it) }
         }
         listenCouleurs()
         listenEnfants()
+        regs += db.collection("anniversaires").addSnapshotListener(MetadataChanges.INCLUDE) { snap, err ->
+            if (err != null) { maj("a", false, err.message) { it }; return@addSnapshotListener }
+            if (snap == null) return@addSnapshotListener
+            val l = snap.documents.mapNotNull { Anniversaire.fromMap(it.id, it.data ?: emptyMap()) }
+                .sortedWith(compareBy({ it.mois }, { it.jour }, { it.nom }))
+            maj("a", snap.metadata.hasPendingWrites(), null) { it.copy(anniversaires = l) }
+            moi?.let { Rappels.planifier(ctx, _state.value.evenements, l, it) }
+        }
+    }
+
+    fun saveAnniversaire(a: Anniversaire) {
+        db.collection("anniversaires").document(a.id).set(a.toMap())
+    }
+
+    fun deleteAnniversaire(a: Anniversaire) {
+        db.collection("anniversaires").document(a.id).delete()
     }
 
     private fun listenCouleurs() {
@@ -166,7 +183,7 @@ class Repo private constructor(private val ctx: Context) {
 
     fun replanifierRappels() {
         val m = moi ?: return
-        Rappels.planifier(ctx, _state.value.evenements, m)
+        Rappels.planifier(ctx, _state.value.evenements, _state.value.anniversaires, m)
     }
 
     fun saveRoulement(w: Who, r: Roulement) {

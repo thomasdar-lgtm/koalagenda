@@ -250,7 +250,8 @@ fun ReglagesScreen(
     onCompteurs: () -> Unit,
     onChangeMoi: () -> Unit,
     onSignOut: () -> Unit,
-    onCouleur: (Who, Long) -> Unit,
+    onApparence: () -> Unit,
+    onAnniversaires: () -> Unit,
     enfants: Enfants,
     onEnfants: (Enfants) -> Unit,
     onBack: () -> Unit,
@@ -298,40 +299,9 @@ fun ReglagesScreen(
                     }
                 }
             }
-            Section("Couleurs")
-            Who.entries.forEach { w -> ChoixCouleur(w, onCouleur) }
-            Section("Thème")
-            Presets(ctx)
-            Spacer(Modifier.height(10.dp))
-            var nuancier by remember { mutableStateOf<String?>(null) }
-            Theme.CHOIX.forEach { (cle, nom, options) ->
-                val actuelle = Theme.valeur(cle)
-                Carte(Modifier.padding(bottom = 8.dp)) {
-                    Text(nom, color = Encre, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                    Spacer(Modifier.height(8.dp))
-                    FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        val liste = if (actuelle in options) options else listOf(actuelle) + options
-                        liste.forEach { c ->
-                            Box(
-                                Modifier.size(28.dp).clip(CircleShape).background(Color(c))
-                                    .border(if (c == actuelle) 3.dp else 1.dp, if (c == actuelle) Encre else Muted.copy(alpha = 0.3f), CircleShape)
-                                    .clickable { Theme.changer(ctx, cle, c) },
-                            )
-                        }
-                        Box(
-                            Modifier.size(28.dp).clip(CircleShape)
-                                .background(androidx.compose.ui.graphics.Brush.sweepGradient(
-                                    listOf(Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta, Color.Red)
-                                ))
-                                .clickable { nuancier = cle },
-                            contentAlignment = Alignment.Center,
-                        ) { Text("+", color = Color.White, fontWeight = FontWeight.Black, fontSize = 16.sp) }
-                    }
-                }
-            }
-            nuancier?.let { cle ->
-                Nuancier(Theme.valeur(cle), onOk = { Theme.changer(ctx, cle, it); nuancier = null }, onDismiss = { nuancier = null })
-            }
+            Section("Personnalisation")
+            LienReglage("Apparence", onApparence)
+            LienReglage("Anniversaires", onAnniversaires)
             Section("Ce téléphone")
             LienReglage("Je suis ${moi.label} · changer", onChangeMoi)
             LienReglage("Se déconnecter", onSignOut)
@@ -443,4 +413,53 @@ private fun Nuancier(initial: Long, onOk: (Long) -> Unit, onDismiss: () -> Unit)
             }
         },
     )
+}
+
+/* ---------- Apparence : couleurs de chacun + thème ---------- */
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun ApparenceScreen(onCouleur: (Who, Long) -> Unit, onBack: () -> Unit) {
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    BackHandler { onBack() }
+    Column(Modifier.fillMaxSize().safeDrawingPadding()) {
+        TopBar("Apparence", onBack)
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
+            Section("Couleurs")
+            Who.entries.forEach { w -> ChoixCouleur(w, onCouleur) }
+            Section("Thème")
+            Presets(ctx)
+            Spacer(Modifier.height(10.dp))
+            var nuancier by remember { mutableStateOf<String?>(null) }
+            Theme.CHOIX.forEach { (cle, nom, options) ->
+                val actuelle = Theme.valeur(cle)
+                Carte(Modifier.padding(bottom = 8.dp)) {
+                    Text(nom, color = Encre, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+                    Spacer(Modifier.height(8.dp))
+                    FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        val liste = if (actuelle in options) options else listOf(actuelle) + options
+                        liste.forEach { c ->
+                            Box(
+                                Modifier.size(28.dp).clip(CircleShape).background(Color(c))
+                                    .border(if (c == actuelle) 3.dp else 1.dp, if (c == actuelle) Encre else Muted.copy(alpha = 0.3f), CircleShape)
+                                    .clickable { Theme.changer(ctx, cle, c) },
+                            )
+                        }
+                        Box(
+                            Modifier.size(28.dp).clip(CircleShape)
+                                .background(androidx.compose.ui.graphics.Brush.sweepGradient(
+                                    listOf(Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Magenta, Color.Red)
+                                ))
+                                .clickable { nuancier = cle },
+                            contentAlignment = Alignment.Center,
+                        ) { Text("+", color = Color.White, fontWeight = FontWeight.Black, fontSize = 16.sp) }
+                    }
+                }
+            }
+            nuancier?.let { cle ->
+                Nuancier(Theme.valeur(cle), onOk = { Theme.changer(ctx, cle, it); nuancier = null }, onDismiss = { nuancier = null })
+            }
+            Spacer(Modifier.height(24.dp))
+        }
+    }
 }

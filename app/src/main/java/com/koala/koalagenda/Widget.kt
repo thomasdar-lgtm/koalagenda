@@ -48,6 +48,7 @@ data class WidgetData(
     val evenements: List<Evenement>,
     val couleurs: Map<Who, Long>,
     val enfants: Enfants,
+    val anniversaires: List<Anniversaire> = emptyList(),
 )
 
 object WidgetStore {
@@ -84,6 +85,9 @@ object WidgetStore {
                 .take(20)
                 .forEach { put(JSONObject(it.toMap()).put("id", it.id)) }
         })
+        o.put("anniversaires", JSONArray().apply {
+            s.anniversaires.forEach { put(JSONObject(it.toMap()).put("id", it.id)) }
+        })
         ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString("data", o.toString()).apply()
         // Regroupe les mises à jour rapprochées
         job?.cancel()
@@ -111,6 +115,9 @@ object WidgetStore {
             },
             couleurs = Who.entries.associateWith { w -> if (c.has(w.id)) c.getLong(w.id) else COULEURS_DEFAUT.getValue(w) },
             enfants = Enfants.fromMap(map(o.opt("enfants"))),
+            anniversaires = o.optJSONArray("anniversaires")?.let { a ->
+                (0 until a.length()).mapNotNull { i -> val m = map(a.get(i)); Anniversaire.fromMap((m["id"] as? String).orEmpty(), m) }
+            } ?: emptyList(),
         )
     }.getOrNull()
 }
@@ -197,12 +204,18 @@ private fun Contenu(data: WidgetData?) {
             }
         }
         Spacer(GlanceModifier.height(8.dp))
-        val prochains = data.evenements.filter { !it.date.isBefore(today) }.take(3)
+        val prochains = (
+            data.evenements.filter { !it.date.isBefore(today) } +
+                data.anniversaires.map { a ->
+                    Evenement(id = "a" + a.id, titre = "🎂 ${a.nom}", date = a.prochain(today), pour = "anniv", rappel = -1)
+                }
+            ).sortedWith(compareBy({ it.date }, { if (it.journee) "" else it.heure })).take(3)
         if (prochains.isEmpty()) {
             Text("Aucun rdv à venir", style = TextStyle(color = cp(Muted), fontSize = 12.sp))
         }
         prochains.forEach { e ->
-            val coul = Who.of(e.pour)?.let { Color(data.couleurs[it] ?: COULEURS_DEFAUT.getValue(it)) } ?: Yellow
+            val coul = Who.of(e.pour)?.let { Color(data.couleurs[it] ?: COULEURS_DEFAUT.getValue(it)) }
+                ?: if (e.pour == "anniv") CouleurAnniv else Yellow
             Row(GlanceModifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
                 Box(GlanceModifier.width(4.dp).height(14.dp).cornerRadius(2.dp).background(coul)) {}
                 Spacer(GlanceModifier.width(6.dp))

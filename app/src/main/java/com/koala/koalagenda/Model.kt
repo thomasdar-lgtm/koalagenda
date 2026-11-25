@@ -398,3 +398,39 @@ fun feries(annee: Int): Map<LocalDate, String> = cacheFeries.getOrPut(annee) {
 }
 
 fun ferie(d: LocalDate): String? = feries(d.year)[d]
+
+/** Anniversaire : revient chaque année. [annee] facultative (0 = inconnue) pour afficher l'âge. */
+data class Anniversaire(
+    val id: String = UUID.randomUUID().toString(),
+    val nom: String = "",
+    val mois: Int = 1,
+    val jour: Int = 1,
+    val annee: Int = 0,
+) {
+    /** Date de l'anniversaire l'année [an] (29 février → 28 février les années non bissextiles). */
+    fun dateEn(an: Int): LocalDate {
+        val ym = java.time.YearMonth.of(an, mois)
+        return ym.atDay(minOf(jour, ym.lengthOfMonth()))
+    }
+
+    fun age(an: Int): Int? = if (annee > 0 && an >= annee) an - annee else null
+
+    /** Prochaine occurrence à partir de [d] (incluse). */
+    fun prochain(d: LocalDate): LocalDate = dateEn(d.year).let { if (it.isBefore(d)) dateEn(d.year + 1) else it }
+
+    fun toMap(): Map<String, Any> = mapOf("nom" to nom.trim(), "mois" to mois, "jour" to jour, "annee" to annee)
+
+    companion object {
+        fun valide(jour: Int, mois: Int): Boolean =
+            mois in 1..12 && jour in 1..java.time.YearMonth.of(2024, mois).lengthOfMonth()
+
+        fun fromMap(id: String, m: Map<String, Any?>): Anniversaire? {
+            val mo = (m["mois"] as? Number)?.toInt() ?: return null
+            val j = (m["jour"] as? Number)?.toInt() ?: return null
+            if (!valide(j, mo)) return null
+            return Anniversaire(id, (m["nom"] as? String).orEmpty(), mo, j, (m["annee"] as? Number)?.toInt() ?: 0)
+        }
+    }
+}
+
+fun anniversairesDu(l: List<Anniversaire>, d: LocalDate): List<Anniversaire> = l.filter { it.dateEn(d.year) == d }

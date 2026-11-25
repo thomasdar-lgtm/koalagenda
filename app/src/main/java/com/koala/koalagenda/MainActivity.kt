@@ -32,6 +32,9 @@ sealed interface Screen {
     data object Roulements : Screen
     data object Compteurs : Screen
     data object Reglages : Screen
+    data object Apparence : Screen
+    data object Anniversaires : Screen
+    data class AnnivEdit(val a: Anniversaire, val isNew: Boolean, val from: Screen) : Screen
 }
 
 class MainActivity : ComponentActivity() {
@@ -121,6 +124,7 @@ fun App(repo: Repo) {
                     screen = Screen.Event(nouveau(d), true, Screen.Month)
                 },
                 onReglages = { screen = Screen.Reglages },
+                onNewAnniv = { screen = Screen.AnnivEdit(Anniversaire(), true, Screen.Month) },
                 selection = selection,
                 onSelection = { selection = it },
                 onValider = { sel ->
@@ -146,10 +150,30 @@ fun App(repo: Repo) {
                 onCompteurs = { screen = Screen.Compteurs },
                 onChangeMoi = { repo.moi = null; moi = null; screen = Screen.Month },
                 onSignOut = { repo.signOut(); signedIn = false; screen = Screen.Month },
-                onCouleur = { w, c -> repo.saveCouleur(w, c) },
+                onApparence = { screen = Screen.Apparence },
+                onAnniversaires = { screen = Screen.Anniversaires },
                 enfants = state.enfants,
                 onEnfants = { repo.saveEnfants(it) },
                 onBack = { screen = Screen.Month },
+            )
+
+            Screen.Apparence -> ApparenceScreen(
+                onCouleur = { w, c -> repo.saveCouleur(w, c) },
+                onBack = { screen = Screen.Reglages },
+            )
+
+            Screen.Anniversaires -> AnniversairesScreen(
+                state,
+                onEdit = { screen = Screen.AnnivEdit(it, false, Screen.Anniversaires) },
+                onNew = { screen = Screen.AnnivEdit(Anniversaire(), true, Screen.Anniversaires) },
+                onBack = { screen = Screen.Reglages },
+            )
+
+            is Screen.AnnivEdit -> AnniversaireEditScreen(
+                s.a, s.isNew,
+                onSave = { repo.saveAnniversaire(it); screen = s.from },
+                onDelete = { repo.deleteAnniversaire(it); screen = s.from },
+                onBack = { screen = s.from },
             )
 
             is Screen.Day -> DayScreen(
@@ -157,6 +181,7 @@ fun App(repo: Repo) {
                 onBack = { screen = Screen.Month },
                 onEvent = { screen = Screen.Event(it, false, s) },
                 onNewEvent = { screen = Screen.Event(nouveau(s.date), true, s) },
+                onAnniv = { screen = Screen.AnnivEdit(it, false, s) },
                 onPeriode = { screen = Screen.Periode(s.date, s) },
             )
 
