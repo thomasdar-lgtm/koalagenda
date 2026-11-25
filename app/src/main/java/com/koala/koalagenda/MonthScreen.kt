@@ -413,18 +413,18 @@ private fun MenuAjout(couleurMoi: Color, onDismiss: () -> Unit, onChoix: (Int) -
                 modifier = Modifier.padding(start = 4.dp, bottom = 14.dp),
             )
             val tuiles = listOf(
-                Triple("📅", "Rdv", Yellow),
-                Triple("🎂", "Anniversaire", CouleurAnniv),
-                Triple("⇄", "Ordo", BleuRemplacement),
-                Triple("🌴", "Congés", couleurMoi),
-                Triple("🔁", "Échanger\nun repos", couleurMoi),
+                Triple(R.drawable.ajout_rdv, "Rdv", Color(0xFF2E86A8)),
+                Triple(R.drawable.ajout_anniv, "Anniversaire", Color(0xFF9A58B0)),
+                Triple(R.drawable.ajout_ordo, "Ordo", Color(0xFF4469B8)),
+                Triple(R.drawable.ajout_conges, "Congés", Color(0xFF2E9283)),
+                Triple(R.drawable.ajout_echange, "Échanger\nun repos", Color(0xFF3F9670)),
             )
             // Rdv en grand, puis deux lignes de deux
-            Tuile(tuiles[0], Modifier.fillMaxWidth().height(78.dp), large = true) { onChoix(0) }
+            Tuile(tuiles[0], Modifier.fillMaxWidth().height(84.dp), large = true) { onChoix(0) }
             Spacer(Modifier.height(10.dp))
             for (ligne in listOf(listOf(1, 2), listOf(3, 4))) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    ligne.forEach { i -> Tuile(tuiles[i], Modifier.weight(1f).height(104.dp), large = false) { onChoix(i) } }
+                    ligne.forEach { i -> Tuile(tuiles[i], Modifier.weight(1f).height(116.dp), large = false) { onChoix(i) } }
                 }
                 Spacer(Modifier.height(10.dp))
             }
@@ -433,14 +433,14 @@ private fun MenuAjout(couleurMoi: Color, onDismiss: () -> Unit, onChoix: (Int) -
 }
 
 @Composable
-private fun Tuile(t: Triple<String, String, Color>, modifier: Modifier, large: Boolean, onClick: () -> Unit) {
+private fun Tuile(t: Triple<Int, String, Color>, modifier: Modifier, large: Boolean, onClick: () -> Unit) {
     val (icone, titre, couleur) = t
     val forme = RoundedCornerShape(20.dp)
     val contenu: @Composable () -> Unit = {
-        Box(
-            Modifier.size(if (large) 46.dp else 42.dp).clip(RoundedCornerShape(14.dp)).background(couleur),
-            contentAlignment = Alignment.Center,
-        ) { Text(icone, fontSize = 22.sp, color = Sombre, fontWeight = FontWeight.Black, style = Serre) }
+        androidx.compose.foundation.Image(
+            androidx.compose.ui.res.painterResource(icone), null,
+            Modifier.size(if (large) 54.dp else 50.dp).clip(RoundedCornerShape(14.dp)),
+        )
     }
     if (large) Row(
         modifier.clip(forme).background(Brush.horizontalGradient(listOf(couleur.copy(alpha = 0.28f), Navy3)))
